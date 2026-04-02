@@ -3,7 +3,7 @@ import { anthropic, buildCoverLetterPrompt } from '@/lib/anthropic';
 import { supabaseAdmin } from '@/lib/supabase';
 
 const FREE_LIMIT_PER_DAY = 1;
-const EMAIL_BONUS_LIMIT = 3; // total for email-verified users
+const EMAIL_BONUS_LIMIT = 3;
 
 function getIp(request) {
   const forwarded = request.headers.get('x-forwarded-for');
@@ -15,7 +15,6 @@ async function checkRateLimit(ip, email) {
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
 
-  // Count today's IP-based generations
   const { count: ipCount, error: ipError } = await supabaseAdmin
     .from('generations')
     .select('*', { count: 'exact', head: true })
@@ -25,7 +24,6 @@ async function checkRateLimit(ip, email) {
   if (ipError) throw new Error('Database error checking rate limit');
 
   if (ipCount >= FREE_LIMIT_PER_DAY) {
-    // Check if they have an email unlock
     if (email) {
       const { data: subscriber } = await supabaseAdmin
         .from('subscribers')
@@ -33,50 +31,42 @@ async function checkRateLimit(ip, email) {
         .eq('email', email)
         .single();
 
-      // Pro users: unlimited
-      if (subscriber?.is_pro) return { allowed: true, isPro: true };
+      if (subscriber?.is_pro) return { allowed: true };
 
-      // Email users: check total generation count
       const { count: emailCount } = await supabaseAdmin
         .from('generations')
         .select('*', { count: 'exact', head: true })
         .eq('email', email);
 
-      if (emailCount < EMAIL_BONUS_LIMIT) {
-        return { allowed: true, isEmailUser: true };
-      }
+      if (emailCount < EMAIL_BONUS_LIMIT) return { allowed: true };
 
       return { allowed: false, reason: 'email_limit_reached' };
     }
-
     return { allowed: false, reason: 'daily_limit_reached' };
   }
 
   return { allowed: true };
 }
 
-async function recordGeneration(ip, email) {
-  await supabaseAdmin.from('generations').insert({ ip_address: ip, email: email || null });
-}
-
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { jobTitle, company, jobDescription, background, tone, language, email } = body;
+    const {
+      jobTitle, company, jobDescription, background,
+      tone, language, email,
+      // Optional enrichment fields
+      companyContext, senderName, senderCity,
+    } = body;
 
     if (!jobTitle || !company || !jobDescription || !background) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const ip = getIp(request);
-
     const { allowed, reason } = await checkRateLimit(ip, email);
 
     if (!allowed) {
-      return NextResponse.json(
-        { error: 'Rate limit reached', reason },
-        { status: 429 }
-      );
+      return NextResponse.json({ error: 'Rate limit reached', reason }, { status: 429 });
     }
 
     const prompt = buildCoverLetterPrompt({
@@ -86,17 +76,22 @@ export async function POST(request) {
       background,
       tone: tone?.toLowerCase() || 'professional',
       language: language || 'English',
+      companyContext: companyContext || null,
+      senderName: senderName || null,
+      senderCity: senderCity || null,
     });
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
-      max_tokens: 1024,
+      max_tokens: 1200,
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const coverLetter = message.content[0].text;
+    const coverLetter = message.content[0].text.trim();
 
-    await recordGeneration(ip, email);
+    await supabaseAdmin
+      .from('generations')
+      .insert({ ip_address: ip, email: email || null });
 
     return NextResponse.json({ coverLetter });
   } catch (err) {

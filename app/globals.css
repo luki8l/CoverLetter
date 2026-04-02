@@ -10,11 +10,53 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* ── Print styles ──────────────────────────────────────────────────────────
+   Hides everything except #letter-print-area.
+   User triggers via window.print() → browser shows "Save as PDF" option.
+   Produces a clean A4-formatted letter.
+*/
+@media print {
+  @page {
+    size: A4;
+    margin: 25mm 20mm;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #letter-print-area,
+  #letter-print-area * {
+    visibility: visible !important;
+  }
+
+  #letter-print-area {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Hide the gradient accent bar when printing */
+  #letter-print-area > div:first-child {
+    display: none !important;
+  }
+
+  /* Ensure good typography for print */
+  #letter-print-area p {
+    font-size: 11pt !important;
+    line-height: 1.7 !important;
+    color: #000 !important;
+  }
+
+  #letter-print-area .text-sm {
+    font-size: 10pt !important;
   }
 }
