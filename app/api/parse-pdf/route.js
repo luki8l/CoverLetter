@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import pdfParse from 'pdf-parse';
 
 export async function POST(request) {
   try {
@@ -17,6 +16,9 @@ export async function POST(request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    // require() inside the handler keeps webpack from trying to bundle pdf-parse at compile time
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const pdfParse = require('pdf-parse');
     const data = await pdfParse(buffer);
 
     const text = data.text
