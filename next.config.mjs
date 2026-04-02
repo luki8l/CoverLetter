@@ -4,9 +4,9 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+    // Next.js 14: keep heavy server-only packages out of the webpack bundle
+    serverComponentsExternalPackages: ['pdf-parse'],
   },
-  // Keep heavy server-only packages out of the webpack bundle
-  serverExternalPackages: ['pdf-parse'],
 };
 
 export default nextConfig;
