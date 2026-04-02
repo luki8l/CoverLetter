@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Allow larger request bodies for job description + CV paste
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
     },
   },
+  // Keep heavy server-only packages out of the webpack bundle
+  serverExternalPackages: ['pdf-parse'],
 };
 
 export default nextConfig;
