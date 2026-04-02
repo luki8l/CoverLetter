@@ -16,8 +16,7 @@ export async function POST(request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // require() inside the handler keeps webpack from trying to bundle pdf-parse at compile time
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // Loaded via Node.js require() at runtime — webpack externals keeps it out of the bundle
     const pdfParse = require('pdf-parse');
     const data = await pdfParse(buffer);
 

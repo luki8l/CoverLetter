@@ -4,8 +4,18 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
-    // Next.js 14: keep heavy server-only packages out of the webpack bundle
     serverComponentsExternalPackages: ['pdf-parse'],
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Hard-exclude pdf-parse from the webpack bundle entirely.
+      // It will be loaded via Node.js require() at runtime instead.
+      const existing = config.externals || [];
+      config.externals = Array.isArray(existing)
+        ? [...existing, 'pdf-parse']
+        : [existing, 'pdf-parse'];
+    }
+    return config;
   },
 };
 
