@@ -17,7 +17,6 @@ function GeneratePageInner() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [unlockedEmail, setUnlockedEmail] = useState('');
   const [lastForm, setLastForm] = useState(null);
   const [upgraded, setUpgraded] = useState(false);
 
@@ -36,7 +35,7 @@ function GeneratePageInner() {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, email: unlockedEmail || undefined }),
+        body: JSON.stringify(formData),
       });
 
       if (res.status === 429) {
@@ -75,12 +74,6 @@ function GeneratePageInner() {
       setIsLoading(false);
       setIsStreaming(false);
     }
-  }
-
-  function handleEmailUnlock(email) {
-    setUnlockedEmail(email);
-    setShowModal(false);
-    if (lastForm) setTimeout(() => generate(lastForm), 300);
   }
 
   return (
@@ -134,7 +127,7 @@ function GeneratePageInner() {
       </footer>
 
       {showModal && (
-        <UpgradeModal onClose={() => setShowModal(false)} onEmailSubmit={handleEmailUnlock} />
+        <UpgradeModal onClose={() => setShowModal(false)} />
       )}
       <ToastContainer toasts={toasts} />
     </div>

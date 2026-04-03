@@ -113,7 +113,6 @@ export default function CVPage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [unlockedEmail, setUnlockedEmail] = useState('');
   const [lastForm, setLastForm] = useState(null);
   const [copied, setCopied] = useState(false);
 
@@ -128,7 +127,7 @@ export default function CVPage() {
       const res = await fetch('/api/optimize-cv', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, email: unlockedEmail || undefined }),
+        body: JSON.stringify(formData),
       });
 
       if (res.status === 429) { setIsLoading(false); setShowModal(true); return; }
@@ -319,11 +318,7 @@ export default function CVPage() {
       </footer>
 
       {showModal && (
-        <UpgradeModal onClose={() => setShowModal(false)} onEmailSubmit={(email) => {
-          setUnlockedEmail(email);
-          setShowModal(false);
-          if (lastForm) setTimeout(() => optimize(lastForm), 300);
-        }} />
+        <UpgradeModal onClose={() => setShowModal(false)} />
       )}
       <ToastContainer toasts={toasts} />
     </div>

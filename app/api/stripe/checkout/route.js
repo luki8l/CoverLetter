@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
+import { createClient } from '@/lib/supabase-server';
 
 export async function POST(request) {
   try {
-    const { email } = await request.json();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -15,11 +18,12 @@ export async function POST(request) {
           quantity: 1,
         },
       ],
-      customer_email: email || undefined,
+      customer_email: user?.email || undefined,
+      client_reference_id: user?.id || undefined,
       success_url: `${appUrl}/generate?upgraded=true`,
       cancel_url: `${appUrl}/pricing`,
       metadata: {
-        email: email || '',
+        user_id: user?.id || '',
       },
     });
 

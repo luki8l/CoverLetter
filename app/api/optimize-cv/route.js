@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAnthropicClient, buildCVPrompt } from '@/lib/anthropic';
-import { supabaseAdmin } from '@/lib/supabase';
+import { createClient, getAdminClient } from '@/lib/supabase-server';
 
 const FREE_LIMIT_PER_DAY = 1;
-const EMAIL_BONUS_LIMIT = 3;
 
 function getIp(request) {
   const forwarded = request.headers.get('x-forwarded-for');
@@ -11,45 +10,10 @@ function getIp(request) {
   return request.headers.get('x-real-ip') || '127.0.0.1';
 }
 
-async function checkRateLimit(ip, email) {
-  const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-
-  const { count: ipCount, error } = await supabaseAdmin
-    .from('generations')
-    .select('*', { count: 'exact', head: true })
-    .eq('ip_address', ip)
-    .gte('created_at', startOfDay);
-
-  if (error) throw new Error('Database error');
-
-  if (ipCount >= FREE_LIMIT_PER_DAY) {
-    if (email) {
-      const { data: subscriber } = await supabaseAdmin
-        .from('subscribers')
-        .select('is_pro')
-        .eq('email', email)
-        .single();
-
-      if (subscriber?.is_pro) return { allowed: true };
-
-      const { count: emailCount } = await supabaseAdmin
-        .from('generations')
-        .select('*', { count: 'exact', head: true })
-        .eq('email', email);
-
-      if (emailCount < EMAIL_BONUS_LIMIT) return { allowed: true };
-      return { allowed: false, reason: 'email_limit_reached' };
-    }
-    return { allowed: false, reason: 'daily_limit_reached' };
-  }
-  return { allowed: true };
-}
-
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { rawText, targetRole, targetIndustry, language, email } = body;
+    const { rawText, targetRole, targetIndustry, language } = body;
 
     if (!rawText || rawText.trim().length < 50) {
       return NextResponse.json(
@@ -58,11 +22,51 @@ export async function POST(request) {
       );
     }
 
+    const admin = getAdminClient();
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
     const ip = getIp(request);
-    const { allowed, reason } = await checkRateLimit(ip, email);
 
-    if (!allowed) {
-      return NextResponse.json({ error: 'Rate limit reached', reason }, { status: 429 });
+    if (user) {
+      const { data: subscriber } = await admin
+        .from('subscribers')
+        .select('is_pro')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!subscriber?.is_pro) {
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const { count } = await admin
+          .from('generations')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .gte('created_at', startOfDay.toISOString());
+
+        if (count >= FREE_LIMIT_PER_DAY) {
+          return NextResponse.json(
+            { error: 'Rate limit reached', reason: 'daily_limit_reached' },
+            { status: 429 }
+          );
+        }
+      }
+    } else {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const { count } = await admin
+        .from('generations')
+        .select('*', { count: 'exact', head: true })
+        .eq('ip_address', ip)
+        .gte('created_at', startOfDay.toISOString());
+
+      if (count >= FREE_LIMIT_PER_DAY) {
+        return NextResponse.json(
+          { error: 'Rate limit reached', reason: 'daily_limit_reached' },
+          { status: 429 }
+        );
+      }
     }
 
     const prompt = buildCVPrompt({ rawText, targetRole, targetIndustry, language });
@@ -86,9 +90,10 @@ export async function POST(request) {
             }
           }
 
-          await supabaseAdmin
-            .from('generations')
-            .insert({ ip_address: ip, email: email || null });
+          await admin.from('generations').insert({
+            ip_address: ip,
+            user_id: user?.id || null,
+          });
         } catch (err) {
           controller.error(err);
         } finally {
