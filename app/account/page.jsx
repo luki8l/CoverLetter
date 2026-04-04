@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient, getAdminClient } from '@/lib/supabase-server';
 import SignOutButton from './SignOutButton';
+import RecentLetters from '@/components/RecentLetters';
 
 export const metadata = { title: 'My Account — CoverDraft' };
 
@@ -201,6 +202,9 @@ export default async function AccountPage() {
             </svg>
           </Link>
         </div>
+
+        {/* Recent letters (reads localStorage on client) */}
+        <RecentLetters />
 
         {/* Upgrade nudge for free users */}
         {!isPro && (

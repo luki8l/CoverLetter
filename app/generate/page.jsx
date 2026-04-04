@@ -42,6 +42,48 @@ function GeneratePageInner() {
     fetch('/api/me').then(r => r.json()).then(d => setIsPro(d.isPro || false)).catch(() => {});
   }, []);
 
+  // Load a letter from history if navigated here from account page
+  useEffect(() => {
+    try {
+      const pending = localStorage.getItem('coverdraft-load-letter');
+      if (!pending) return;
+      localStorage.removeItem('coverdraft-load-letter');
+      const { letter, formData, matchData: savedMatch } = JSON.parse(pending);
+      if (letter) {
+        setCoverLetter(letter);
+        if (formData) setLastForm(formData);
+        if (savedMatch) setMatchData(savedMatch);
+        setTimeout(() => document.getElementById('output-anchor')?.scrollIntoView({ behavior: 'smooth' }), 200);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  // Auto-save finished letters to history
+  useEffect(() => {
+    if (!coverLetter || isStreaming || !lastForm) return;
+    try {
+      const HISTORY_KEY = 'coverdraft-history';
+      const existing = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      // Deduplicate: skip if same company+jobTitle generated within last 5 minutes
+      const isDuplicate = existing.length > 0
+        && existing[0].company === lastForm.company
+        && existing[0].jobTitle === lastForm.jobTitle
+        && (Date.now() - new Date(existing[0].date).getTime()) < 5 * 60 * 1000;
+      if (isDuplicate) return;
+      const entry = {
+        id: String(Date.now()),
+        jobTitle: lastForm.jobTitle || '',
+        company: lastForm.company || '',
+        date: new Date().toISOString(),
+        letter: coverLetter,
+        formData: lastForm,
+        matchData: matchData || null,
+      };
+      const updated = [entry, ...existing].slice(0, 10);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+    } catch { /* ignore */ }
+  }, [coverLetter, isStreaming]);
+
   async function analyze(formData) {
     setMatchLoading(true);
     setMatchError('');
