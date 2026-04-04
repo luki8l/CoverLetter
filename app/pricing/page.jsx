@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
 import Navbar from '@/components/Navbar';
 import PricingCard from '@/components/PricingCard';
 
@@ -14,35 +16,50 @@ const FREE_FEATURES = [
 
 const PRO_FEATURES = [
   'Unlimited generations',
+  'Cover letter generator',
+  'CV Optimizer',
   'All tones & languages',
-  'Download as PDF',
-  'Save generation history',
+  'PDF download & print',
   'Priority AI processing',
-  'Email support',
 ];
 
-export default function PricingPage() {
-  const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
 
-  async function handleUpgrade(e) {
-    e.preventDefault();
+export default function PricingPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    getSupabase().auth.getUser().then(({ data: { user } }) => setUser(user));
+  }, []);
+
+  async function handleUpgrade() {
+    if (!user) {
+      router.push('/auth?redirect=/pricing');
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({}),
       });
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
         alert('Something went wrong. Please try again.');
+        setLoading(false);
       }
     } catch {
       alert('Network error. Please try again.');
-    } finally {
       setLoading(false);
     }
   }
@@ -98,22 +115,19 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <form onSubmit={handleUpgrade} className="space-y-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com (optional)"
-                className="w-full bg-indigo-500 placeholder-indigo-300 text-white border border-indigo-400 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-white"
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-white text-indigo-600 py-3 rounded-xl font-semibold text-sm hover:bg-indigo-50 disabled:opacity-70 transition"
-              >
-                {loading ? 'Redirecting...' : 'Upgrade to Pro →'}
-              </button>
-            </form>
+            <button
+              onClick={handleUpgrade}
+              disabled={loading}
+              className="w-full bg-white text-indigo-600 py-3 rounded-xl font-semibold text-sm hover:bg-indigo-50 disabled:opacity-70 transition"
+            >
+              {loading ? 'Redirecting…' : user ? 'Upgrade to Pro →' : 'Sign in to upgrade →'}
+            </button>
+
+            {!user && (
+              <p className="text-center text-xs text-indigo-300 -mt-3">
+                You&apos;ll be asked to sign in first
+              </p>
+            )}
           </div>
         </div>
 
@@ -124,11 +138,11 @@ export default function PricingPage() {
             {[
               {
                 q: 'Can I cancel anytime?',
-                a: 'Yes. Cancel your Pro subscription at any time from your Stripe billing portal. No questions asked.',
+                a: 'Yes. Cancel your Pro subscription at any time from your account page. No questions asked.',
               },
               {
                 q: 'What counts as a "generation"?',
-                a: 'Each time you click "Generate Cover Letter" counts as one generation. Regenerating counts as another.',
+                a: 'Each time you click "Generate Cover Letter" or "Optimize CV" counts as one generation.',
               },
               {
                 q: 'Which AI model is used?',
@@ -136,7 +150,7 @@ export default function PricingPage() {
               },
               {
                 q: 'Is my data saved?',
-                a: 'We only store your IP address and optionally your email to enforce usage limits. Your cover letter content is not stored.',
+                a: 'Your form inputs are saved locally in your browser. Your generated content is never stored on our servers.',
               },
             ].map((item, i) => (
               <div key={i} className="border-b border-gray-100 pb-6">

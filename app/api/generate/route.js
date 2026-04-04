@@ -10,6 +10,35 @@ function getIp(request) {
   return request.headers.get('x-real-ip') || '127.0.0.1';
 }
 
+async function getSubscriber(admin, userId, email) {
+  // Try by user_id first
+  if (userId) {
+    const { data } = await admin
+      .from('subscribers')
+      .select('is_pro, user_id')
+      .eq('user_id', userId)
+      .single();
+    if (data) return data;
+  }
+  // Fallback: match by email (e.g. bought before logging in)
+  if (email) {
+    const { data } = await admin
+      .from('subscribers')
+      .select('is_pro, user_id')
+      .eq('email', email)
+      .single();
+    // Link user_id retroactively so future lookups are fast
+    if (data && userId && !data.user_id) {
+      await admin
+        .from('subscribers')
+        .update({ user_id: userId })
+        .eq('email', email);
+    }
+    return data;
+  }
+  return null;
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -28,15 +57,9 @@ export async function POST(request) {
     const ip = getIp(request);
 
     if (user) {
-      // Check if Pro
-      const { data: subscriber } = await admin
-        .from('subscribers')
-        .select('is_pro')
-        .eq('user_id', user.id)
-        .single();
+      const subscriber = await getSubscriber(admin, user.id, user.email);
 
       if (!subscriber?.is_pro) {
-        // Authenticated but free: 1 per day by user_id
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
 
@@ -53,9 +76,7 @@ export async function POST(request) {
           );
         }
       }
-      // Pro → no limit check
     } else {
-      // Anonymous: 1 per day by IP
       const startOfDay = new Date();
       startOfDay.setHours(0, 0, 0, 0);
 

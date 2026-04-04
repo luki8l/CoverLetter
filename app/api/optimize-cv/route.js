@@ -10,6 +10,32 @@ function getIp(request) {
   return request.headers.get('x-real-ip') || '127.0.0.1';
 }
 
+async function getSubscriber(admin, userId, email) {
+  if (userId) {
+    const { data } = await admin
+      .from('subscribers')
+      .select('is_pro, user_id')
+      .eq('user_id', userId)
+      .single();
+    if (data) return data;
+  }
+  if (email) {
+    const { data } = await admin
+      .from('subscribers')
+      .select('is_pro, user_id')
+      .eq('email', email)
+      .single();
+    if (data && userId && !data.user_id) {
+      await admin
+        .from('subscribers')
+        .update({ user_id: userId })
+        .eq('email', email);
+    }
+    return data;
+  }
+  return null;
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -28,11 +54,7 @@ export async function POST(request) {
     const ip = getIp(request);
 
     if (user) {
-      const { data: subscriber } = await admin
-        .from('subscribers')
-        .select('is_pro')
-        .eq('user_id', user.id)
-        .single();
+      const subscriber = await getSubscriber(admin, user.id, user.email);
 
       if (!subscriber?.is_pro) {
         const startOfDay = new Date();
