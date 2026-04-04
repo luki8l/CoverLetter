@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import GeneratorForm from '@/components/GeneratorForm';
 import OutputSection from '@/components/OutputSection';
+import RefinePanel from '@/components/RefinePanel';
 import UpgradeModal from '@/components/UpgradeModal';
 import { ToastContainer } from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -120,6 +121,21 @@ function GeneratePageInner() {
           formData={lastForm}
           onToast={toast}
         />
+
+        {coverLetter && !isStreaming && (
+          <div className="mt-4">
+            <RefinePanel
+              formData={lastForm}
+              currentLetter={coverLetter}
+              onRefined={(text, streaming) => {
+                setCoverLetter(text);
+                setIsStreaming(streaming);
+                if (streaming) setTimeout(() => document.getElementById('output-anchor')?.scrollIntoView({ behavior: 'smooth' }), 100);
+              }}
+              onShowModal={() => setShowModal(true)}
+            />
+          </div>
+        )}
       </main>
 
       <footer className="border-t border-gray-100 bg-white py-6 text-center">
