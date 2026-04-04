@@ -23,7 +23,7 @@ function WordCount({ text, warn = 300 }) {
   );
 }
 
-export default function GeneratorForm({ onGenerate, isLoading }) {
+export default function GeneratorForm({ onGenerate, onAnalyze, isLoading, isAnalyzing }) {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [companyContext, setCompanyContext] = useState('');
   const [jobLocation, setJobLocation] = useState('');
@@ -107,10 +107,15 @@ export default function GeneratorForm({ onGenerate, isLoading }) {
     onGenerate({ ...form, companyContext, jobLocation });
   }
 
+  function handleAnalyze() {
+    onAnalyze?.({ ...form, companyContext, jobLocation });
+  }
+
   const fieldClass =
     'w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-white';
 
   const hasSavedData = form.jobTitle || form.company || form.jobDescription || form.background;
+  const canAnalyze = form.jobDescription.trim().length > 50 && form.background.trim().length > 50;
 
   return (
     <form id="generator-form" onSubmit={handleSubmit} className="space-y-6">
@@ -295,23 +300,51 @@ export default function GeneratorForm({ onGenerate, isLoading }) {
       </div>
 
       {/* ── Actions ───────────────────────────────────────── */}
-      <div className="flex items-center gap-3">
-        <button type="submit" disabled={isLoading}
-          className="flex-1 bg-indigo-600 text-white py-3.5 px-6 rounded-xl font-semibold text-sm hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition flex items-center justify-center gap-2 shadow-sm shadow-indigo-200">
-          {isLoading ? (
-            <>
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-              </svg>
-              Writing…
-            </>
-          ) : 'Generate Cover Letter →'}
-        </button>
-        {hasSavedData && (
-          <button type="button" onClick={handleReset}
-            className="text-xs text-gray-400 hover:text-gray-600 px-3 py-3.5 rounded-xl hover:bg-gray-100 transition whitespace-nowrap">
-            Clear
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-3">
+          <button type="submit" disabled={isLoading}
+            className="flex-1 bg-indigo-600 text-white py-3.5 px-6 rounded-xl font-semibold text-sm hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed transition flex items-center justify-center gap-2 shadow-sm shadow-indigo-200">
+            {isLoading ? (
+              <>
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                Writing…
+              </>
+            ) : 'Generate Cover Letter →'}
+          </button>
+          {hasSavedData && (
+            <button type="button" onClick={handleReset}
+              className="text-xs text-gray-400 hover:text-gray-600 px-3 py-3.5 rounded-xl hover:bg-gray-100 transition whitespace-nowrap">
+              Clear
+            </button>
+          )}
+        </div>
+
+        {canAnalyze && onAnalyze && (
+          <button
+            type="button"
+            onClick={handleAnalyze}
+            disabled={isAnalyzing || isLoading}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {isAnalyzing ? (
+              <>
+                <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                Analyzing fit…
+              </>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Analyze Job Fit — see your match score
+              </>
+            )}
           </button>
         )}
       </div>

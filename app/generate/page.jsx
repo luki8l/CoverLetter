@@ -6,6 +6,8 @@ import Navbar from '@/components/Navbar';
 import GeneratorForm from '@/components/GeneratorForm';
 import OutputSection from '@/components/OutputSection';
 import RefinePanel from '@/components/RefinePanel';
+import MatchCard from '@/components/MatchCard';
+import InterviewPrep from '@/components/InterviewPrep';
 import UpgradeModal from '@/components/UpgradeModal';
 import { ToastContainer } from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -21,9 +23,65 @@ function GeneratePageInner() {
   const [lastForm, setLastForm] = useState(null);
   const [upgraded, setUpgraded] = useState(false);
 
+  // Match analysis state
+  const [matchData, setMatchData] = useState(null);   // null | { score, strengths, gaps, angle }
+  const [matchLoading, setMatchLoading] = useState(false);
+  const [matchError, setMatchError] = useState('');
+
+  // Interview prep state
+  const [interviewData, setInterviewData] = useState(null);  // null | { questions: [...] }
+  const [interviewLoading, setInterviewLoading] = useState(false);
+  const [interviewError, setInterviewError] = useState('');
+
   useEffect(() => {
     if (searchParams.get('upgraded') === 'true') setUpgraded(true);
   }, [searchParams]);
+
+  async function analyze(formData) {
+    setMatchLoading(true);
+    setMatchError('');
+    setMatchData(null);
+    // Reset interview prep when re-analyzing
+    setInterviewData(null);
+    setInterviewError('');
+    setTimeout(() => document.getElementById('match-anchor')?.scrollIntoView({ behavior: 'smooth' }), 80);
+    try {
+      const res = await fetch('/api/match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Analysis failed');
+      setMatchData(data);
+    } catch (err) {
+      setMatchError(err.message || 'Analysis failed. Please try again.');
+    } finally {
+      setMatchLoading(false);
+    }
+  }
+
+  async function prepInterview() {
+    if (!lastForm) return;
+    setInterviewLoading(true);
+    setInterviewError('');
+    setInterviewData(null);
+    setTimeout(() => document.getElementById('interview-anchor')?.scrollIntoView({ behavior: 'smooth' }), 80);
+    try {
+      const res = await fetch('/api/interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...lastForm, coverLetter }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Interview prep failed');
+      setInterviewData(data);
+    } catch (err) {
+      setInterviewError(err.message || 'Interview prep failed. Please try again.');
+    } finally {
+      setInterviewLoading(false);
+    }
+  }
 
   async function generate(formData) {
     setIsLoading(true);
@@ -31,6 +89,9 @@ function GeneratePageInner() {
     setError('');
     setCoverLetter('');
     setLastForm(formData);
+    // Reset interview prep when regenerating
+    setInterviewData(null);
+    setInterviewError('');
 
     try {
       const res = await fetch('/api/generate', {
@@ -99,8 +160,26 @@ function GeneratePageInner() {
         )}
 
         <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm">
-          <GeneratorForm onGenerate={generate} isLoading={isLoading || isStreaming} />
+          <GeneratorForm
+            onGenerate={generate}
+            onAnalyze={analyze}
+            isLoading={isLoading || isStreaming}
+            isAnalyzing={matchLoading}
+          />
         </div>
+
+        {/* ── Job Fit Analysis ─────────────────────────────── */}
+        {(matchData || matchLoading || matchError) && (
+          <div className="mt-4" id="match-anchor">
+            <MatchCard
+              data={matchData}
+              isLoading={matchLoading}
+              error={matchError}
+              onRetry={() => lastForm && analyze(lastForm)}
+            />
+          </div>
+        )}
+        {!matchLoading && !matchData && !matchError && <div id="match-anchor" />}
 
         {error && (
           <div className="mt-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-2">
@@ -133,6 +212,18 @@ function GeneratePageInner() {
                 if (streaming) setTimeout(() => document.getElementById('output-anchor')?.scrollIntoView({ behavior: 'smooth' }), 100);
               }}
               onShowModal={() => setShowModal(true)}
+            />
+          </div>
+        )}
+
+        {/* ── Interview Prep ───────────────────────────────── */}
+        {coverLetter && !isStreaming && (
+          <div id="interview-anchor">
+            <InterviewPrep
+              data={interviewData}
+              isLoading={interviewLoading}
+              error={interviewError}
+              onGenerate={prepInterview}
             />
           </div>
         )}
