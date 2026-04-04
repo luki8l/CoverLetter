@@ -4,16 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
 export default function Navbar() {
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    );
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
       setReady(true);

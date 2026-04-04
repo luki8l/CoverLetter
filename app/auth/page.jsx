@@ -5,10 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
 
 function AuthForm() {
   const router = useRouter();
@@ -25,7 +27,7 @@ function AuthForm() {
 
   // Redirect if already logged in
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    getSupabase().auth.getUser().then(({ data: { user } }) => {
       if (user) router.push(redirect);
     });
   }, [redirect, router]);
@@ -38,7 +40,7 @@ function AuthForm() {
 
     if (mode === 'reset') {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
         redirectTo: `${appUrl}/auth/callback?next=/account`,
       });
       setLoading(false);
@@ -49,7 +51,7 @@ function AuthForm() {
 
     if (mode === 'signup') {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-      const { error } = await supabase.auth.signUp({
+      const { error } = await getSupabase().auth.signUp({
         email,
         password,
         options: {
@@ -63,7 +65,7 @@ function AuthForm() {
     }
 
     // Sign in
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await getSupabase().auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       setError(
