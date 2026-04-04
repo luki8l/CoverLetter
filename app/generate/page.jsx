@@ -22,6 +22,7 @@ function GeneratePageInner() {
   const [showModal, setShowModal] = useState(false);
   const [lastForm, setLastForm] = useState(null);
   const [upgraded, setUpgraded] = useState(false);
+  const [isPro, setIsPro] = useState(false);
 
   // Match analysis state
   const [matchData, setMatchData] = useState(null);   // null | { score, strengths, gaps, angle }
@@ -36,6 +37,10 @@ function GeneratePageInner() {
   useEffect(() => {
     if (searchParams.get('upgraded') === 'true') setUpgraded(true);
   }, [searchParams]);
+
+  useEffect(() => {
+    fetch('/api/me').then(r => r.json()).then(d => setIsPro(d.isPro || false)).catch(() => {});
+  }, []);
 
   async function analyze(formData) {
     setMatchLoading(true);
@@ -175,6 +180,7 @@ function GeneratePageInner() {
               data={matchData}
               isLoading={matchLoading}
               error={matchError}
+              isPro={isPro}
               onRetry={() => lastForm && analyze(lastForm)}
             />
           </div>
@@ -223,6 +229,7 @@ function GeneratePageInner() {
               data={interviewData}
               isLoading={interviewLoading}
               error={interviewError}
+              isPro={isPro}
               onGenerate={prepInterview}
             />
           </div>

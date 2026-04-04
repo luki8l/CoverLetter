@@ -99,14 +99,18 @@ function PrepSkeleton() {
   );
 }
 
-export default function InterviewPrep({ data, isLoading, error, onGenerate }) {
+const FREE_QUESTIONS = 2;
+
+export default function InterviewPrep({ data, isLoading, error, isPro, onGenerate }) {
   if (!data && !isLoading && !error) {
     return (
       <div className="mt-6 border-t border-gray-100 pt-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h3 className="text-sm font-bold text-gray-900">Interview Prep</h3>
-            <p className="text-xs text-gray-500 mt-0.5">5 predicted questions — specific to this role and your background</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {isPro ? '5 predicted questions — specific to this role and your background' : '2 free questions · 5 with Pro'}
+            </p>
           </div>
           <button
             type="button"
@@ -123,6 +127,8 @@ export default function InterviewPrep({ data, isLoading, error, onGenerate }) {
     );
   }
 
+  const lockedQuestions = !isPro && data ? data.questions.slice(FREE_QUESTIONS) : [];
+
   return (
     <div className="mt-6 border-t border-gray-100 pt-6">
       <div className="flex items-center gap-2 mb-4">
@@ -130,7 +136,10 @@ export default function InterviewPrep({ data, isLoading, error, onGenerate }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <h3 className="text-sm font-bold text-gray-900">Interview Prep</h3>
-        <span className="ml-auto text-xs text-gray-400 bg-gray-50 border border-gray-100 rounded-full px-2 py-0.5">Free</span>
+        {isPro
+          ? <span className="ml-auto text-xs text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-full px-2 py-0.5 font-medium">Pro</span>
+          : <span className="ml-auto text-xs text-gray-400 bg-gray-50 border border-gray-100 rounded-full px-2 py-0.5">2 / 5 free</span>
+        }
       </div>
 
       {isLoading && <PrepSkeleton />}
@@ -146,12 +155,57 @@ export default function InterviewPrep({ data, isLoading, error, onGenerate }) {
 
       {data && !isLoading && (
         <div className="space-y-2">
-          {data.questions.map((q, i) => (
+          {/* Free questions (always visible) */}
+          {data.questions.slice(0, isPro ? data.questions.length : FREE_QUESTIONS).map((q, i) => (
             <QuestionCard key={i} q={q} index={i} defaultOpen={i === 0} />
           ))}
-          <p className="text-xs text-gray-400 text-center pt-2">
-            Questions generated based on this job description and your background
-          </p>
+
+          {/* Locked questions for free users */}
+          {lockedQuestions.length > 0 && (
+            <div className="relative mt-1">
+              {/* Blurred question previews */}
+              <div className="blur-[3px] select-none pointer-events-none space-y-2" aria-hidden="true">
+                {lockedQuestions.map((q, i) => (
+                  <div key={i} className="border border-gray-200 rounded-xl p-4 flex items-start gap-3">
+                    <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      {FREE_QUESTIONS + i + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900">{q.question}</p>
+                      {q.type && <div className="mt-1.5"><TypeBadge type={q.type} /></div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Upgrade overlay — gradient fade + CTA */}
+              <div className="absolute inset-0 flex flex-col items-center justify-end pb-4 bg-gradient-to-b from-transparent via-white/70 to-white rounded-b-xl">
+                <div className="text-center px-4">
+                  <p className="text-sm font-semibold text-gray-900 mb-1">
+                    +{lockedQuestions.length} more questions locked
+                  </p>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Includes Technical, Situational & Challenge questions with full answer frameworks
+                  </p>
+                  <a
+                    href="/pricing"
+                    className="inline-flex items-center gap-2 bg-indigo-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition shadow-sm shadow-indigo-200"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                    Unlock all 5 — Upgrade to Pro
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isPro && (
+            <p className="text-xs text-gray-400 text-center pt-2">
+              Questions generated based on this job description and your background
+            </p>
+          )}
         </div>
       )}
     </div>
