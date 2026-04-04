@@ -1,20 +1,13 @@
 'use client';
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
-}
 
 export default function SignOutButton() {
   const router = useRouter();
 
   async function handleSignOut() {
-    await getSupabase().auth.signOut();
+    await createClient().auth.signOut();
     router.push('/');
     router.refresh();
   }

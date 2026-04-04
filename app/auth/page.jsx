@@ -3,14 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
-}
+import { createClient } from '@/lib/supabase-client';
 
 function AuthForm() {
   const router = useRouter();
@@ -27,7 +20,7 @@ function AuthForm() {
 
   // Redirect if already logged in
   useEffect(() => {
-    getSupabase().auth.getUser().then(({ data: { user } }) => {
+    createClient().auth.getUser().then(({ data: { user } }) => {
       if (user) router.push(redirect);
     });
   }, [redirect, router]);
@@ -38,9 +31,11 @@ function AuthForm() {
     setError('');
     setMessage('');
 
+    const supabase = createClient();
+
     if (mode === 'reset') {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-      const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${appUrl}/auth/callback?next=/account`,
       });
       setLoading(false);
@@ -51,7 +46,7 @@ function AuthForm() {
 
     if (mode === 'signup') {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-      const { error } = await getSupabase().auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -65,7 +60,7 @@ function AuthForm() {
     }
 
     // Sign in
-    const { error } = await getSupabase().auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       setError(
@@ -164,7 +159,6 @@ function AuthForm() {
           </form>
         )}
 
-        {/* Mode toggle */}
         {!message && (
           <div className="mt-6 pt-6 border-t border-gray-100 text-center text-sm text-gray-500">
             {mode === 'signin' ? (

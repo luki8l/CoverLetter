@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase-client';
 import Navbar from '@/components/Navbar';
 import PricingCard from '@/components/PricingCard';
 
@@ -23,25 +23,18 @@ const PRO_FEATURES = [
   'Priority AI processing',
 ];
 
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
-}
-
 export default function PricingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    getSupabase().auth.getUser().then(({ data: { user } }) => setUser(user));
+    createClient().auth.getUser().then(({ data: { user } }) => setUser(user));
   }, []);
 
   async function handleUpgrade() {
     if (!user) {
-      router.push('/auth?redirect=/pricing');
+      window.location.href = '/auth?redirect=/pricing';
       return;
     }
     setLoading(true);
