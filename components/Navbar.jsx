@@ -38,10 +38,22 @@ export default function Navbar() {
 
         <div className="flex items-center gap-1 sm:gap-2">
           <Link
-            href="/cv"
-            className="text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
+            href="/generate"
+            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
           >
-            CV Optimizer
+            Cover Letter
+          </Link>
+          <Link
+            href="/cv"
+            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
+          >
+            CV
+          </Link>
+          <Link
+            href="/followup"
+            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
+          >
+            Follow-up
           </Link>
           <Link
             href="/pricing"

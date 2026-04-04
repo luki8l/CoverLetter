@@ -8,6 +8,7 @@ import OutputSection from '@/components/OutputSection';
 import RefinePanel from '@/components/RefinePanel';
 import MatchCard from '@/components/MatchCard';
 import InterviewPrep from '@/components/InterviewPrep';
+import WhatsNext from '@/components/WhatsNext';
 import UpgradeModal from '@/components/UpgradeModal';
 import { ToastContainer } from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -248,6 +249,14 @@ function GeneratePageInner() {
           formData={lastForm}
           onToast={toast}
         />
+
+        {coverLetter && !isStreaming && (
+          <WhatsNext
+            formData={lastForm}
+            onScrollToInterview={() => document.getElementById('interview-anchor')?.scrollIntoView({ behavior: 'smooth' })}
+            onToast={toast}
+          />
+        )}
 
         {coverLetter && !isStreaming && (
           <div className="mt-4">

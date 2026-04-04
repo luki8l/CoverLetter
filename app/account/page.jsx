@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { createClient, getAdminClient } from '@/lib/supabase-server';
 import SignOutButton from './SignOutButton';
 import RecentLetters from '@/components/RecentLetters';
+import ApplicationTracker from '@/components/ApplicationTracker';
 
 export const metadata = { title: 'My Account — CoverDraft' };
 
@@ -202,6 +203,9 @@ export default async function AccountPage() {
             </svg>
           </Link>
         </div>
+
+        {/* Application tracker (reads localStorage on client) */}
+        <ApplicationTracker />
 
         {/* Recent letters (reads localStorage on client) */}
         <RecentLetters />
