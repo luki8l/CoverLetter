@@ -27,9 +27,18 @@ function parseParagraphs(text) {
 }
 
 function getSignals(text, jobTitle, company) {
+  const lower = text.toLowerCase();
   const words = text.split(/\s+/).filter(Boolean).length;
-  const hasCompany = company && text.toLowerCase().includes(company.toLowerCase());
-  const hasJobTitle = jobTitle && text.toLowerCase().includes(jobTitle.toLowerCase().split(' ')[0]);
+
+  // Company: exact match OR any significant word from the name (ignores AG, GmbH, Ltd…)
+  const GENERIC_WORDS = new Set(['bank', 'group', 'international', 'global', 'gmbh', 'inc', 'ltd', 'ag', 'se', 'sa', 'bv', 'nv', 'and', 'the', 'of', 'for']);
+  const hasCompany = company && (() => {
+    if (lower.includes(company.toLowerCase())) return true;
+    const significantWords = company.toLowerCase().split(/[\s,.\-&]+/).filter(w => w.length > 3 && !GENERIC_WORDS.has(w));
+    return significantWords.length > 0 && significantWords.some(w => lower.includes(w));
+  })();
+
+  const hasJobTitle = jobTitle && lower.includes(jobTitle.toLowerCase().split(' ')[0]);
   const noGenericOpening = !/(i am writing to apply|to whom it may concern)/i.test(text);
   const underWordLimit = words <= 380;
   return { words, hasCompany, hasJobTitle, noGenericOpening, underWordLimit };
@@ -224,19 +233,41 @@ export default function OutputSection({ coverLetter, isStreaming, onRegenerate, 
       {!isStreaming && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {[
-            { label: `${signals.words} words`, ok: signals.underWordLimit, note: signals.underWordLimit ? `${signals.words} words ✓` : `${signals.words} words — trim` },
-            { label: 'Company referenced', ok: signals.hasCompany },
-            { label: 'No generic opener', ok: signals.noGenericOpening },
-            { label: 'Role keyword', ok: signals.hasJobTitle },
+            {
+              label: signals.underWordLimit ? `${signals.words} words ✓` : `${signals.words} words — trim`,
+              ok: signals.underWordLimit,
+              tip: signals.underWordLimit ? null : 'Most hiring managers prefer under 380 words. Consider cutting a paragraph.',
+            },
+            {
+              label: 'Company referenced',
+              ok: signals.hasCompany,
+              tip: signals.hasCompany ? null : `The company name "${company || ''}" wasn't found. ATS systems score higher when the employer's name appears naturally in the body.`,
+            },
+            {
+              label: 'No generic opener',
+              ok: signals.noGenericOpening,
+              tip: signals.noGenericOpening ? null : 'Avoid openers like "I am writing to apply…" — ATS and recruiters both flag these.',
+            },
+            {
+              label: 'Role keyword',
+              ok: signals.hasJobTitle,
+              tip: signals.hasJobTitle ? null : `The job title "${(jobTitle || '').split(' ')[0]}" wasn't detected. Mentioning the exact role title improves ATS ranking.`,
+            },
           ].map((s, i) => (
-            <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium ${s.ok ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
+            <div key={i} className={`relative group flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium cursor-default ${s.ok ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
               <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {s.ok
                   ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 }
               </svg>
-              <span>{s.note || s.label}</span>
+              <span>{s.label}</span>
+              {s.tip && (
+                <div className="absolute bottom-full left-0 mb-2 w-56 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed">
+                  {s.tip}
+                  <div className="absolute top-full left-4 border-4 border-transparent border-t-gray-900" />
+                </div>
+              )}
             </div>
           ))}
         </div>
