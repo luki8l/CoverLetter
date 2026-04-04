@@ -12,8 +12,8 @@ export async function POST(request) {
     const prompt = buildInterviewPrompt({ jobTitle, company, jobDescription, background, coverLetter });
 
     const message = await getAnthropicClient().messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1200,
+      model: 'claude-sonnet-4-5',
+      max_tokens: 2500,
       messages: [{ role: 'user', content: prompt }],
     });
 
