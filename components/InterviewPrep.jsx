@@ -179,22 +179,22 @@ export default function InterviewPrep({ data, isLoading, error, isPro, onGenerat
               </div>
 
               {/* Upgrade overlay — gradient fade + CTA */}
-              <div className="absolute inset-0 flex flex-col items-center justify-end pb-4 bg-gradient-to-b from-transparent via-white/70 to-white rounded-b-xl">
+              <div className="absolute inset-0 flex flex-col items-center justify-end pb-5 bg-gradient-to-b from-transparent via-white/80 to-white rounded-b-xl">
                 <div className="text-center px-4">
-                  <p className="text-sm font-semibold text-gray-900 mb-1">
-                    +{lockedQuestions.length} more questions locked
+                  <p className="text-sm font-bold text-gray-900 mb-1">
+                    {lockedQuestions.length} questions locked
                   </p>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Includes Technical, Situational & Challenge questions with full answer frameworks
+                  <p className="text-xs text-gray-500 mb-3 max-w-xs mx-auto">
+                    These are the <strong>Technical & Situational</strong> questions — the ones most candidates get wrong because they didn&apos;t prepare.
                   </p>
                   <a
                     href="/pricing"
                     className="inline-flex items-center gap-2 bg-indigo-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-indigo-700 transition shadow-sm shadow-indigo-200"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
-                    Unlock all 5 — Upgrade to Pro
+                    Unlock all 5 — €9/month
                   </a>
                 </div>
               </div>

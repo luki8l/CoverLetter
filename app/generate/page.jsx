@@ -9,6 +9,7 @@ import RefinePanel from '@/components/RefinePanel';
 import MatchCard from '@/components/MatchCard';
 import InterviewPrep from '@/components/InterviewPrep';
 import WhatsNext from '@/components/WhatsNext';
+import SignupNudge from '@/components/SignupNudge';
 import UpgradeModal from '@/components/UpgradeModal';
 import { ToastContainer } from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -24,6 +25,7 @@ function GeneratePageInner() {
   const [lastForm, setLastForm] = useState(null);
   const [upgraded, setUpgraded] = useState(false);
   const [isPro, setIsPro] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(null); // null = checking
 
   // Match analysis state
   const [matchData, setMatchData] = useState(null);   // null | { score, strengths, gaps, angle }
@@ -40,7 +42,10 @@ function GeneratePageInner() {
   }, [searchParams]);
 
   useEffect(() => {
-    fetch('/api/me').then(r => r.json()).then(d => setIsPro(d.isPro || false)).catch(() => {});
+    fetch('/api/me')
+      .then(r => r.json())
+      .then(d => { setIsPro(d.isPro || false); setIsLoggedIn(d.loggedIn || false); })
+      .catch(() => setIsLoggedIn(false));
   }, []);
 
   // Load a letter from history if navigated here from account page
@@ -249,6 +254,11 @@ function GeneratePageInner() {
           formData={lastForm}
           onToast={toast}
         />
+
+        {/* Signup nudge — only for anonymous users after generating */}
+        {coverLetter && !isStreaming && isLoggedIn === false && (
+          <SignupNudge />
+        )}
 
         {coverLetter && !isStreaming && (
           <WhatsNext

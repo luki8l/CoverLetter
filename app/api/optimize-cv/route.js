@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { getAnthropicClient, buildCVPrompt } from '@/lib/anthropic';
 import { createClient, getAdminClient } from '@/lib/supabase-server';
 
-const FREE_LIMIT_PER_DAY = 1;
+const ANON_LIMIT = 1;
+const FREE_USER_LIMIT = 2;
 
 function getIp(request) {
   const forwarded = request.headers.get('x-forwarded-for');
@@ -66,7 +67,7 @@ export async function POST(request) {
           .eq('user_id', user.id)
           .gte('created_at', startOfDay.toISOString());
 
-        if (count >= FREE_LIMIT_PER_DAY) {
+        if (count >= FREE_USER_LIMIT) {
           return NextResponse.json(
             { error: 'Rate limit reached', reason: 'daily_limit_reached' },
             { status: 429 }
@@ -83,7 +84,7 @@ export async function POST(request) {
         .eq('ip_address', ip)
         .gte('created_at', startOfDay.toISOString());
 
-      if (count >= FREE_LIMIT_PER_DAY) {
+      if (count >= ANON_LIMIT) {
         return NextResponse.json(
           { error: 'Rate limit reached', reason: 'daily_limit_reached' },
           { status: 429 }

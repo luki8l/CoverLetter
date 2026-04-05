@@ -122,7 +122,10 @@ export default function MatchCard({ data, isLoading, error, isPro, onRetry }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
           <h3 className="text-sm font-bold text-gray-900">Job Fit Analysis</h3>
-          <span className="ml-auto text-xs text-gray-400 bg-gray-50 border border-gray-100 rounded-full px-2 py-0.5">Free</span>
+          {isPro
+            ? <span className="ml-auto text-xs text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-full px-2 py-0.5 font-medium">Pro</span>
+            : <span className="ml-auto text-xs text-gray-400 bg-gray-50 border border-gray-100 rounded-full px-2 py-0.5">Partial free</span>
+          }
         </div>
 
         {/* Score + strengths/gaps */}
@@ -147,21 +150,63 @@ export default function MatchCard({ data, isLoading, error, isPro, onRetry }) {
               </ul>
             </div>
 
-            {/* Gaps */}
+            {/* Gaps — gated behind Pro */}
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Gaps / Watch-outs</p>
-              <ul className="space-y-2">
-                {data.gaps.map((g, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700 leading-snug">
-                    <span className="mt-0.5 w-4 h-4 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                      <svg className="w-2.5 h-2.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01" />
-                      </svg>
-                    </span>
-                    {g}
-                  </li>
-                ))}
-              </ul>
+              {isPro ? (
+                <ul className="space-y-2">
+                  {data.gaps.map((g, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-gray-700 leading-snug">
+                      <span className="mt-0.5 w-4 h-4 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                        <svg className="w-2.5 h-2.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01" />
+                        </svg>
+                      </span>
+                      {g}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="relative">
+                  {/* Show first gap, blur the rest */}
+                  <ul className="space-y-2">
+                    {data.gaps.slice(0, 1).map((g, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700 leading-snug">
+                        <span className="mt-0.5 w-4 h-4 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                          <svg className="w-2.5 h-2.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01" />
+                          </svg>
+                        </span>
+                        {g}
+                      </li>
+                    ))}
+                  </ul>
+                  {data.gaps.length > 1 && (
+                    <div className="mt-2 relative">
+                      <div className="blur-sm select-none pointer-events-none space-y-2" aria-hidden="true">
+                        {data.gaps.slice(1).map((g, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-gray-700 leading-snug list-none">
+                            <span className="mt-0.5 w-4 h-4 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                              <svg className="w-2.5 h-2.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01" />
+                              </svg>
+                            </span>
+                            {g}
+                          </li>
+                        ))}
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <a href="/pricing" className="flex items-center gap-1.5 bg-white border border-amber-200 shadow-sm rounded-lg px-2.5 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-50 transition whitespace-nowrap">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                          +{data.gaps.length - 1} more — Pro
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -191,15 +236,15 @@ export default function MatchCard({ data, isLoading, error, isPro, onRetry }) {
             </div>
             {/* Overlay CTA */}
             <div className="absolute inset-0 flex items-center justify-center rounded-xl">
-              <div className="flex items-center gap-3 bg-white/95 backdrop-blur-sm border border-indigo-200 rounded-xl shadow-md px-4 py-2.5">
+              <a href="/pricing" className="flex items-center gap-2.5 bg-white/95 backdrop-blur-sm border border-indigo-200 rounded-xl shadow-md px-4 py-2.5 hover:bg-white transition group">
                 <svg className="w-4 h-4 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                <span className="text-sm font-semibold text-gray-800">Pro feature</span>
-                <a href="/pricing" className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition underline underline-offset-2">
-                  Upgrade →
-                </a>
-              </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-900 leading-tight">Your letter angle is hidden</p>
+                  <p className="text-xs text-indigo-600 font-semibold group-hover:underline">Unlock with Pro →</p>
+                </div>
+              </a>
             </div>
           </div>
         )}

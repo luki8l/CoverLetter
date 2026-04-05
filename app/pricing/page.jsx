@@ -7,12 +7,13 @@ import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 
 const FREE_FEATURES = [
-  { text: '1 cover letter per day', included: true },
-  { text: 'CV Optimizer (1/day)', included: true },
-  { text: 'Job Fit Score — match %, strengths & gaps', included: true },
-  { text: '2 interview questions with answer frameworks', included: true },
+  { text: '2 cover letters/day (free account)', included: true },
+  { text: 'CV Optimizer (2/day)', included: true },
+  { text: 'Job Fit Score — match % + strengths only', included: true },
+  { text: '2 of 5 interview questions', included: true },
   { text: 'PDF & Word (.docx) export', included: true },
   { text: 'English & German', included: true },
+  { text: 'Gaps analysis (watch-outs)', included: false },
   { text: 'Letter Strategy tip', included: false },
   { text: 'All 5 interview questions', included: false },
   { text: 'Unlimited generations', included: false },
@@ -21,11 +22,10 @@ const FREE_FEATURES = [
 const PRO_FEATURES = [
   { text: 'Unlimited cover letter generations', highlight: false },
   { text: 'Unlimited CV optimizations', highlight: false },
-  { text: 'Job Fit Score — full analysis', highlight: false },
+  { text: 'Full gaps analysis — what\'s working against you', highlight: true },
   { text: 'Letter Strategy tip — exact angle to lead with', highlight: true },
   { text: 'All 5 interview questions + answer frameworks', highlight: true },
   { text: 'PDF & Word (.docx) export', highlight: false },
-  { text: 'Refine with one click', highlight: false },
   { text: 'All tones & languages', highlight: false },
   { text: 'Priority AI processing', highlight: false },
 ];
@@ -37,7 +37,7 @@ const FAQS = [
   },
   {
     q: 'What counts as a "generation"?',
-    a: 'Each time you click "Generate Cover Letter" or "Optimize CV" counts as one generation. Job Fit Analysis and Interview Prep are always free and do not count.',
+    a: 'Each time you click "Generate Cover Letter" or "Optimize CV" counts as one generation. Job Fit Analysis and Interview Prep do not count toward your limit — but the full gaps analysis and Letter Strategy tip within Job Fit require Pro.',
   },
   {
     q: 'Which AI model is used?',
@@ -190,7 +190,18 @@ export default function PricingPage() {
         {/* What Pro unlocks — visual callout */}
         <div className="mt-12 max-w-3xl mx-auto bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-6 sm:p-8">
           <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-3">Why Pro is worth it</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Full Gaps Analysis</p>
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Free users see 1 gap. Pro reveals all of them — so you know exactly what to address or explain away in your letter.</p>
+              </div>
+            </div>
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
                 <svg className="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -199,7 +210,7 @@ export default function PricingPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-900">Letter Strategy</p>
-                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">The exact one-sentence angle to lead with — based on your background vs. this specific JD. Turns a generic letter into a targeted one.</p>
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">One sentence, generated from your CV vs. the JD: the exact angle to lead with. Turns a generic letter into a targeted one.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -210,7 +221,7 @@ export default function PricingPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-900">All 5 Interview Questions</p>
-                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Free gets 2. Pro unlocks the Technical, Situational, and Challenge questions — the ones that trip people up unprepared.</p>
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Free gets 2. Pro unlocks Technical, Situational & Challenge — the ones that catch unprepared candidates off guard.</p>
               </div>
             </div>
           </div>

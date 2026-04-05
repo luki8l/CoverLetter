@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getAnthropicClient, buildCoverLetterPrompt } from '@/lib/anthropic';
 import { createClient, getAdminClient } from '@/lib/supabase-server';
+import { sendWelcomeEmail, sendLimitReachedEmail } from '@/lib/email';
 
-const FREE_LIMIT_PER_DAY = 1;
+const ANON_LIMIT = 1;        // IP-based, no account
+const FREE_USER_LIMIT = 2;   // logged-in free account (clearly better than anonymous — creates upgrade pressure at 2)
 
 function getIp(request) {
   const forwarded = request.headers.get('x-forwarded-for');
@@ -55,6 +57,7 @@ export async function POST(request) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     const ip = getIp(request);
+    let isFirstGeneration = false;
 
     if (user) {
       const subscriber = await getSubscriber(admin, user.id, user.email);
@@ -69,11 +72,22 @@ export async function POST(request) {
           .eq('user_id', user.id)
           .gte('created_at', startOfDay.toISOString());
 
-        if (count >= FREE_LIMIT_PER_DAY) {
+        if (count >= FREE_USER_LIMIT) {
+          // Fire-and-forget limit-reached email (high-intent conversion moment)
+          sendLimitReachedEmail({ email: user.email }).catch(() => {});
           return NextResponse.json(
             { error: 'Rate limit reached', reason: 'daily_limit_reached' },
             { status: 429 }
           );
+        }
+
+        // Track first-ever generation for welcome email
+        if (count === 0) {
+          const { count: totalCount } = await admin
+            .from('generations')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
+          isFirstGeneration = (totalCount === 0);
         }
       }
     } else {
@@ -86,7 +100,7 @@ export async function POST(request) {
         .eq('ip_address', ip)
         .gte('created_at', startOfDay.toISOString());
 
-      if (count >= FREE_LIMIT_PER_DAY) {
+      if (count >= ANON_LIMIT) {
         return NextResponse.json(
           { error: 'Rate limit reached', reason: 'daily_limit_reached' },
           { status: 429 }
@@ -126,6 +140,10 @@ export async function POST(request) {
             ip_address: ip,
             user_id: user?.id || null,
           });
+          // Welcome email on first ever generation for logged-in users
+          if (isFirstGeneration && user) {
+            sendWelcomeEmail({ email: user.email }).catch(() => {});
+          }
         } catch (err) {
           controller.error(err);
         } finally {
