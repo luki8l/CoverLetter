@@ -7,6 +7,7 @@ export const meta = {
   date: '2025-04-08',
   readTime: '5 min read',
   keywords: ['ats cover letter', 'ats friendly cover letter', 'applicant tracking system cover letter', 'ats optimized cover letter'],
+  related: ['how-to-write-a-cover-letter', 'cover-letter-examples', 'software-engineer-cover-letter'],
 };
 
 export default function Post() {

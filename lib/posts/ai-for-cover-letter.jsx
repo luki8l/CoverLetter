@@ -7,6 +7,7 @@ export const meta = {
   date: '2025-04-11',
   readTime: '6 min read',
   keywords: ['ai for cover letter', 'ai cover letter', 'use ai for cover letter', 'best ai for cover letter', 'ai cover letter writer'],
+  related: ['ai-cover-letter-generator', 'how-to-write-a-cover-letter', 'cover-letter-examples'],
 };
 
 export default function Post() {

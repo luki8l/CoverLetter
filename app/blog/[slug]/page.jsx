@@ -3,6 +3,8 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { getPost, allPosts } from '@/lib/posts/index.js';
 
+const APP_URL = 'https://coverdraft.app';
+
 export async function generateStaticParams() {
   return allPosts.map((p) => ({ slug: p.slug }));
 }
@@ -15,11 +17,11 @@ export async function generateMetadata({ params }) {
     title: `${meta.titleTag || meta.title} | CoverDraft`,
     description: meta.description,
     keywords: meta.keywords,
-    alternates: { canonical: `https://coverdraft.app/blog/${meta.slug}` },
+    alternates: { canonical: `${APP_URL}/blog/${meta.slug}` },
     openGraph: {
       title: meta.title,
       description: meta.description,
-      url: `https://coverdraft.app/blog/${meta.slug}`,
+      url: `${APP_URL}/blog/${meta.slug}`,
       type: 'article',
       publishedTime: meta.date,
     },
@@ -32,18 +34,57 @@ export default async function BlogPost({ params }) {
 
   const { meta, Content } = post;
 
+  // Resolve related posts
+  const relatedPosts = meta.related
+    ? meta.related
+        .map((slug) => allPosts.find((p) => p.slug === slug))
+        .filter(Boolean)
+    : [];
+
+  // Article schema
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: meta.title,
+    description: meta.description,
+    datePublished: meta.date,
+    dateModified: meta.date,
+    author: { '@type': 'Organization', name: 'CoverDraft', url: APP_URL },
+    publisher: {
+      '@type': 'Organization',
+      name: 'CoverDraft',
+      url: APP_URL,
+      logo: { '@type': 'ImageObject', url: `${APP_URL}/logo.png` },
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${APP_URL}/blog/${meta.slug}` },
+  };
+
+  // BreadcrumbList schema
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: APP_URL },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${APP_URL}/blog` },
+      { '@type': 'ListItem', position: 3, name: meta.title, item: `${APP_URL}/blog/${meta.slug}` },
+    ],
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+
       <Navbar />
 
       <main className="flex-1 w-full max-w-2xl mx-auto px-4 sm:px-6 py-16">
         {/* Breadcrumb */}
-        <nav className="mb-8 flex items-center gap-2 text-xs text-gray-400">
+        <nav aria-label="Breadcrumb" className="mb-8 flex items-center gap-2 text-xs text-gray-400">
           <Link href="/" className="hover:text-gray-600 transition">Home</Link>
           <span>/</span>
           <Link href="/blog" className="hover:text-gray-600 transition">Blog</Link>
           <span>/</span>
-          <span className="text-gray-600 truncate">{meta.title}</span>
+          <span className="text-gray-600 truncate">{meta.titleTag || meta.title}</span>
         </nav>
 
         {/* Article header */}
@@ -101,6 +142,27 @@ export default async function BlogPost({ params }) {
             </Link>
           </div>
         </div>
+
+        {/* Related Posts */}
+        {relatedPosts.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-lg font-bold text-gray-900 mb-5">Read next</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {relatedPosts.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={`/blog/${p.slug}`}
+                  className="group block bg-gray-50 border border-gray-100 rounded-xl p-4 hover:border-indigo-200 hover:bg-indigo-50/40 transition"
+                >
+                  <p className="text-xs text-gray-400 mb-1.5">{p.readTime}</p>
+                  <p className="text-sm font-semibold text-gray-900 group-hover:text-indigo-700 leading-snug transition">
+                    {p.titleTag || p.title}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
 
       <footer className="border-t border-gray-100 py-8 text-center">

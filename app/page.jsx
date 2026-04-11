@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import LeadCaptureSection from '@/components/LeadCaptureSection';
+import { allPosts } from '@/lib/posts/index.js';
 
 const TOOLS = [
   {
@@ -261,6 +262,38 @@ export default function HomePage() {
                     <p className="text-xs text-gray-400">{t.role}</p>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── From the Blog ───────────────────────────────────── */}
+        <section className="py-20 px-4 bg-gray-50 border-y border-gray-100">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-end justify-between mb-10">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2">From the blog</p>
+                <h2 className="text-3xl font-extrabold text-gray-900">Cover letter guides &amp; tips</h2>
+              </div>
+              <Link href="/blog" className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition shrink-0 ml-4">
+                All articles →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {allPosts.slice(0, 6).map((post) => (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className="group bg-white rounded-2xl border border-gray-200 p-6 hover:border-indigo-200 hover:shadow-sm transition flex flex-col"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xs text-gray-400">{post.readTime}</span>
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 group-hover:text-indigo-700 leading-snug transition flex-1">
+                    {post.titleTag || post.title}
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-3 leading-relaxed line-clamp-2">{post.description}</p>
+                </Link>
               ))}
             </div>
           </div>

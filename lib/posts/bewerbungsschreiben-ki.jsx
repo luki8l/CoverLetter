@@ -6,6 +6,7 @@ export const meta = {
   date: '2025-04-07',
   readTime: '5 min Lesezeit',
   keywords: ['KI Bewerbungsschreiben', 'Bewerbung KI', 'Anschreiben Generator', 'Bewerbungsschreiben schreiben KI', 'ki anschreiben'],
+  related: ['anschreiben-vorlage', 'ats-cover-letter', 'ai-for-cover-letter'],
 };
 
 export default function Post() {

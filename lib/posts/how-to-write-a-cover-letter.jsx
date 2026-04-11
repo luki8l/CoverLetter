@@ -7,6 +7,7 @@ export const meta = {
   date: '2025-04-10',
   readTime: '6 min read',
   keywords: ['how to write a cover letter', 'cover letter format', 'cover letter structure', 'cover letter tips'],
+  related: ['how-to-start-a-cover-letter', 'cover-letter-examples', 'ats-cover-letter'],
 };
 
 export default function Post() {

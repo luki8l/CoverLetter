@@ -7,6 +7,7 @@ export const meta = {
   date: '2025-04-06',
   readTime: '5 min read',
   keywords: ['follow up email after interview', 'thank you email after interview', 'follow up email job application', 'interview follow up'],
+  related: ['how-to-write-a-cover-letter', 'cover-letter-examples', 'how-to-start-a-cover-letter'],
 };
 
 export default function Post() {
