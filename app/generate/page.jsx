@@ -88,7 +88,7 @@ function GeneratePageInner() {
       const updated = [entry, ...existing].slice(0, 10);
       localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
     } catch { /* ignore */ }
-  }, [coverLetter, isStreaming]);
+  }, [coverLetter, isStreaming, lastForm, matchData]);
 
   async function analyze(formData) {
     setMatchLoading(true);
