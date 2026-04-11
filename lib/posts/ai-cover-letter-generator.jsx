@@ -76,6 +76,10 @@ export default function Post() {
       </p>
 
       <h2>Tips for Getting the Best Output</h2>
+      <p>
+        If you are new to <a href="/blog/ai-for-cover-letter">using AI for cover letters</a>, start with understanding
+        the right workflow — the tool is only as good as what you give it.
+      </p>
       <ul>
         <li><strong>Paste the full JD, not just the title.</strong> The more specific the requirements, the more specific the letter.</li>
         <li><strong>Include metrics in your background.</strong> &ldquo;Grew revenue by 40%&rdquo; will show up in the letter. &ldquo;Worked on sales&rdquo; will not.</li>

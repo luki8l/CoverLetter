@@ -81,7 +81,8 @@ export default function Post() {
       <h2>The Faster Way</h2>
       <p>
         Writing a strong, tailored cover letter for every application takes 30–45 minutes if you do it properly. If
-        you are applying to multiple roles, that adds up fast.
+        you are applying to multiple roles, that adds up fast. <a href="/blog/ai-for-cover-letter">Using AI for
+        your cover letter</a> cuts that to under two minutes — if you use it correctly.
       </p>
       <p>
         <a href="/generate">CoverDraft</a> generates a tailored cover letter from your background and the job
