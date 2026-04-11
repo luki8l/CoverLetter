@@ -9,6 +9,8 @@ export default function sitemap() {
     { url: `${baseUrl}/followup`,         lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9  },
     { url: `${baseUrl}/cv`,               lastModified: new Date(), changeFrequency: 'monthly', priority: 0.85 },
     { url: `${baseUrl}/pricing`,          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7  },
+    { url: `${baseUrl}/linkedin`,         lastModified: new Date(), changeFrequency: 'monthly', priority: 0.88 },
+    { url: `${baseUrl}/resign`,           lastModified: new Date(), changeFrequency: 'monthly', priority: 0.88 },
     { url: `${baseUrl}/blog`,             lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8  },
   ];
 

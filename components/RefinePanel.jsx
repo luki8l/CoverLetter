@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const QUICK_CHIPS = [
   { id: 'longer',    label: 'Make it longer',        text: 'Make the letter longer — add more substance and depth, aim for 350+ words.' },
@@ -18,6 +18,15 @@ export default function RefinePanel({ formData, currentLetter, onRefined, onShow
   const [freeText, setFreeText] = useState('');
   const [refining, setRefining] = useState(false);
   const [error, setError] = useState('');
+
+  // Listen for grade-improve events from LetterGrade component
+  useEffect(() => {
+    function onGradeImprove(e) {
+      if (e.detail?.feedback) setFreeText(e.detail.feedback);
+    }
+    window.addEventListener('grade-improve', onGradeImprove);
+    return () => window.removeEventListener('grade-improve', onGradeImprove);
+  }, []);
 
   const { company, jobTitle, language } = formData || {};
 

@@ -37,36 +37,13 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-2">
-          <Link
-            href="/generate"
-            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
-          >
-            Cover Letter
-          </Link>
-          <Link
-            href="/cv"
-            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
-          >
-            CV
-          </Link>
-          <Link
-            href="/followup"
-            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
-          >
-            Follow-up
-          </Link>
-          <Link
-            href="/blog"
-            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
-          >
-            Blog
-          </Link>
-          <Link
-            href="/pricing"
-            className="text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
-          >
-            Pricing
-          </Link>
+          <Link href="/generate"  className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition">Cover Letter</Link>
+          <Link href="/cv"        className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition">CV</Link>
+          <Link href="/followup"  className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition">Follow-up</Link>
+          <Link href="/linkedin"  className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition">LinkedIn</Link>
+          <Link href="/resign"    className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition">Resign</Link>
+          <Link href="/blog"      className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition">Blog</Link>
+          <Link href="/pricing"   className="text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition">Pricing</Link>
 
           {ready ? (
             user ? (

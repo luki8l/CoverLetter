@@ -63,6 +63,19 @@ export default function WhatsNext({ formData, onScrollToInterview, onToast }) {
         </svg>
         Prep interview
       </button>
+
+      <span className="text-gray-200 text-xs">·</span>
+
+      {/* LinkedIn outreach */}
+      <a
+        href={`/linkedin?company=${encodeURIComponent(formData?.company || '')}&role=${encodeURIComponent(formData?.jobTitle || '')}`}
+        className="flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-indigo-300 transition"
+      >
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        Message recruiter
+      </a>
     </div>
   );
 }

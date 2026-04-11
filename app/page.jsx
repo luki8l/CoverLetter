@@ -61,6 +61,12 @@ const TOOLS = [
   },
 ];
 
+const MINI_TOOLS = [
+  { href: '/linkedin', label: 'LinkedIn Message Generator', desc: 'Cold outreach, open role, connection request. Messages recruiters actually reply to.' },
+  { href: '/resign',   label: 'Resignation Letter Generator', desc: 'Standard notice, immediate, or retirement. Professional and dignified.' },
+  { href: '/followup', label: 'Follow-up Email Generator', desc: 'Thank-you, check-in, rejection recovery. The email that tips decisions.' },
+];
+
 const WORKFLOW_STEPS = [
   { num: '01', title: 'Paste the job URL', body: 'Auto-fills everything — title, company, description, and company context. No copy-paste.', badge: null },
   { num: '02', title: 'Check your fit', body: 'See your match score, strengths, gaps, and the exact angle to lead with — before writing a word.', badge: 'Free' },
@@ -208,6 +214,21 @@ export default function HomePage() {
                     {tool.cta}
                   </Link>
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Mini Tools ──────────────────────────────────────── */}
+        <section className="py-12 px-4">
+          <div className="max-w-5xl mx-auto">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 text-center mb-6">More free tools</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {MINI_TOOLS.map((t) => (
+                <Link key={t.href} href={t.href} className="group bg-gray-50 border border-gray-200 rounded-2xl p-5 hover:border-indigo-200 hover:bg-indigo-50/30 transition">
+                  <p className="text-sm font-bold text-gray-900 group-hover:text-indigo-700 transition mb-1.5">{t.label}</p>
+                  <p className="text-xs text-gray-500 leading-relaxed">{t.desc}</p>
+                </Link>
               ))}
             </div>
           </div>

@@ -11,6 +11,7 @@ import InterviewPrep from '@/components/InterviewPrep';
 import WhatsNext from '@/components/WhatsNext';
 import SignupNudge from '@/components/SignupNudge';
 import UpgradeModal from '@/components/UpgradeModal';
+import LetterGrade from '@/components/LetterGrade';
 import { ToastContainer } from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
 
@@ -245,6 +246,23 @@ function GeneratePageInner() {
         onToast={toast}
       />
 
+      {/* Cover Letter Grade */}
+      {coverLetter && !isStreaming && (
+        <LetterGrade
+          coverLetter={coverLetter}
+          jobDescription={lastForm?.jobDescription}
+          jobTitle={lastForm?.jobTitle}
+          company={lastForm?.company}
+          onImprove={(tips) => {
+            // Pre-fill the refine panel with the grade tips
+            const feedback = tips.map(t => `- ${t}`).join('\n');
+            setTimeout(() => document.getElementById('refine-anchor')?.scrollIntoView({ behavior: 'smooth' }), 100);
+            window.__gradeImprove = feedback;
+            window.dispatchEvent(new CustomEvent('grade-improve', { detail: { feedback } }));
+          }}
+        />
+      )}
+
       {/* Signup nudge — only for anonymous users after generating */}
       {coverLetter && !isStreaming && isLoggedIn === false && (
         <SignupNudge />
@@ -259,7 +277,7 @@ function GeneratePageInner() {
       )}
 
       {coverLetter && !isStreaming && (
-        <div className="mt-4">
+        <div className="mt-4" id="refine-anchor">
           <RefinePanel
             formData={lastForm}
             currentLetter={coverLetter}
