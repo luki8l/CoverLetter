@@ -2,12 +2,39 @@ import { NextResponse } from 'next/server';
 import { getAnthropicClient, buildCVPrompt } from '@/lib/anthropic';
 import { createClient, getAdminClient } from '@/lib/supabase-server';
 
-const FREE_LIMIT_PER_DAY = 1;
+const ANON_LIMIT = 1;
+const FREE_USER_LIMIT = 2;
 
 function getIp(request) {
   const forwarded = request.headers.get('x-forwarded-for');
   if (forwarded) return forwarded.split(',')[0].trim();
   return request.headers.get('x-real-ip') || '127.0.0.1';
+}
+
+async function getSubscriber(admin, userId, email) {
+  if (userId) {
+    const { data } = await admin
+      .from('subscribers')
+      .select('is_pro, user_id')
+      .eq('user_id', userId)
+      .single();
+    if (data) return data;
+  }
+  if (email) {
+    const { data } = await admin
+      .from('subscribers')
+      .select('is_pro, user_id')
+      .eq('email', email)
+      .single();
+    if (data && userId && !data.user_id) {
+      await admin
+        .from('subscribers')
+        .update({ user_id: userId })
+        .eq('email', email);
+    }
+    return data;
+  }
+  return null;
 }
 
 export async function POST(request) {
@@ -28,11 +55,7 @@ export async function POST(request) {
     const ip = getIp(request);
 
     if (user) {
-      const { data: subscriber } = await admin
-        .from('subscribers')
-        .select('is_pro')
-        .eq('user_id', user.id)
-        .single();
+      const subscriber = await getSubscriber(admin, user.id, user.email);
 
       if (!subscriber?.is_pro) {
         const startOfDay = new Date();
@@ -44,7 +67,7 @@ export async function POST(request) {
           .eq('user_id', user.id)
           .gte('created_at', startOfDay.toISOString());
 
-        if (count >= FREE_LIMIT_PER_DAY) {
+        if (count >= FREE_USER_LIMIT) {
           return NextResponse.json(
             { error: 'Rate limit reached', reason: 'daily_limit_reached' },
             { status: 429 }
@@ -61,7 +84,7 @@ export async function POST(request) {
         .eq('ip_address', ip)
         .gte('created_at', startOfDay.toISOString());
 
-      if (count >= FREE_LIMIT_PER_DAY) {
+      if (count >= ANON_LIMIT) {
         return NextResponse.json(
           { error: 'Rate limit reached', reason: 'daily_limit_reached' },
           { status: 429 }

@@ -5,6 +5,11 @@ import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import GeneratorForm from '@/components/GeneratorForm';
 import OutputSection from '@/components/OutputSection';
+import RefinePanel from '@/components/RefinePanel';
+import MatchCard from '@/components/MatchCard';
+import InterviewPrep from '@/components/InterviewPrep';
+import WhatsNext from '@/components/WhatsNext';
+import SignupNudge from '@/components/SignupNudge';
 import UpgradeModal from '@/components/UpgradeModal';
 import { ToastContainer } from '@/components/Toast';
 import { useToast } from '@/hooks/useToast';
@@ -19,10 +24,117 @@ function GeneratePageInner() {
   const [showModal, setShowModal] = useState(false);
   const [lastForm, setLastForm] = useState(null);
   const [upgraded, setUpgraded] = useState(false);
+  const [isPro, setIsPro] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(null); // null = checking
+
+  // Match analysis state
+  const [matchData, setMatchData] = useState(null);   // null | { score, strengths, gaps, angle }
+  const [matchLoading, setMatchLoading] = useState(false);
+  const [matchError, setMatchError] = useState('');
+
+  // Interview prep state
+  const [interviewData, setInterviewData] = useState(null);  // null | { questions: [...] }
+  const [interviewLoading, setInterviewLoading] = useState(false);
+  const [interviewError, setInterviewError] = useState('');
 
   useEffect(() => {
     if (searchParams.get('upgraded') === 'true') setUpgraded(true);
   }, [searchParams]);
+
+  useEffect(() => {
+    fetch('/api/me')
+      .then(r => r.json())
+      .then(d => { setIsPro(d.isPro || false); setIsLoggedIn(d.loggedIn || false); })
+      .catch(() => setIsLoggedIn(false));
+  }, []);
+
+  // Load a letter from history if navigated here from account page
+  useEffect(() => {
+    try {
+      const pending = localStorage.getItem('coverdraft-load-letter');
+      if (!pending) return;
+      localStorage.removeItem('coverdraft-load-letter');
+      const { letter, formData, matchData: savedMatch } = JSON.parse(pending);
+      if (letter) {
+        setCoverLetter(letter);
+        if (formData) setLastForm(formData);
+        if (savedMatch) setMatchData(savedMatch);
+        setTimeout(() => document.getElementById('output-anchor')?.scrollIntoView({ behavior: 'smooth' }), 200);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  // Auto-save finished letters to history
+  useEffect(() => {
+    if (!coverLetter || isStreaming || !lastForm) return;
+    try {
+      const HISTORY_KEY = 'coverdraft-history';
+      const existing = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      // Deduplicate: skip if same company+jobTitle generated within last 5 minutes
+      const isDuplicate = existing.length > 0
+        && existing[0].company === lastForm.company
+        && existing[0].jobTitle === lastForm.jobTitle
+        && (Date.now() - new Date(existing[0].date).getTime()) < 5 * 60 * 1000;
+      if (isDuplicate) return;
+      const entry = {
+        id: String(Date.now()),
+        jobTitle: lastForm.jobTitle || '',
+        company: lastForm.company || '',
+        date: new Date().toISOString(),
+        letter: coverLetter,
+        formData: lastForm,
+        matchData: matchData || null,
+      };
+      const updated = [entry, ...existing].slice(0, 10);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+    } catch { /* ignore */ }
+  }, [coverLetter, isStreaming]);
+
+  async function analyze(formData) {
+    setMatchLoading(true);
+    setMatchError('');
+    setMatchData(null);
+    // Reset interview prep when re-analyzing
+    setInterviewData(null);
+    setInterviewError('');
+    setTimeout(() => document.getElementById('match-anchor')?.scrollIntoView({ behavior: 'smooth' }), 80);
+    try {
+      const res = await fetch('/api/match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Analysis failed');
+      setMatchData(data);
+    } catch (err) {
+      setMatchError(err.message || 'Analysis failed. Please try again.');
+    } finally {
+      setMatchLoading(false);
+    }
+  }
+
+  async function prepInterview() {
+    if (!lastForm) return;
+    setInterviewLoading(true);
+    setInterviewError('');
+    setInterviewData(null);
+    setTimeout(() => document.getElementById('interview-anchor')?.scrollIntoView({ behavior: 'smooth' }), 80);
+    try {
+      const res = await fetch('/api/interview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...lastForm, coverLetter }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Interview prep failed');
+      setInterviewData(data);
+    } catch (err) {
+      setInterviewError(err.message || 'Interview prep failed. Please try again.');
+    } finally {
+      setInterviewLoading(false);
+    }
+  }
 
   async function generate(formData) {
     setIsLoading(true);
@@ -30,6 +142,9 @@ function GeneratePageInner() {
     setError('');
     setCoverLetter('');
     setLastForm(formData);
+    // Reset interview prep when regenerating
+    setInterviewData(null);
+    setInterviewError('');
 
     try {
       const res = await fetch('/api/generate', {
@@ -98,8 +213,27 @@ function GeneratePageInner() {
         )}
 
         <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm">
-          <GeneratorForm onGenerate={generate} isLoading={isLoading || isStreaming} />
+          <GeneratorForm
+            onGenerate={generate}
+            onAnalyze={analyze}
+            isLoading={isLoading || isStreaming}
+            isAnalyzing={matchLoading}
+          />
         </div>
+
+        {/* ── Job Fit Analysis ─────────────────────────────── */}
+        {(matchData || matchLoading || matchError) && (
+          <div className="mt-4" id="match-anchor">
+            <MatchCard
+              data={matchData}
+              isLoading={matchLoading}
+              error={matchError}
+              isPro={isPro}
+              onRetry={() => lastForm && analyze(lastForm)}
+            />
+          </div>
+        )}
+        {!matchLoading && !matchData && !matchError && <div id="match-anchor" />}
 
         {error && (
           <div className="mt-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-2">
@@ -120,6 +254,47 @@ function GeneratePageInner() {
           formData={lastForm}
           onToast={toast}
         />
+
+        {/* Signup nudge — only for anonymous users after generating */}
+        {coverLetter && !isStreaming && isLoggedIn === false && (
+          <SignupNudge />
+        )}
+
+        {coverLetter && !isStreaming && (
+          <WhatsNext
+            formData={lastForm}
+            onScrollToInterview={() => document.getElementById('interview-anchor')?.scrollIntoView({ behavior: 'smooth' })}
+            onToast={toast}
+          />
+        )}
+
+        {coverLetter && !isStreaming && (
+          <div className="mt-4">
+            <RefinePanel
+              formData={lastForm}
+              currentLetter={coverLetter}
+              onRefined={(text, streaming) => {
+                setCoverLetter(text);
+                setIsStreaming(streaming);
+                if (streaming) setTimeout(() => document.getElementById('output-anchor')?.scrollIntoView({ behavior: 'smooth' }), 100);
+              }}
+              onShowModal={() => setShowModal(true)}
+            />
+          </div>
+        )}
+
+        {/* ── Interview Prep ───────────────────────────────── */}
+        {coverLetter && !isStreaming && (
+          <div id="interview-anchor">
+            <InterviewPrep
+              data={interviewData}
+              isLoading={interviewLoading}
+              error={interviewError}
+              isPro={isPro}
+              onGenerate={prepInterview}
+            />
+          </div>
+        )}
       </main>
 
       <footer className="border-t border-gray-100 bg-white py-6 text-center">

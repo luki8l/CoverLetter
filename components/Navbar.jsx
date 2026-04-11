@@ -2,17 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase-client';
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    );
+    const supabase = createClient();
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
       setReady(true);
@@ -20,6 +18,7 @@ export default function Navbar() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setReady(true);
     });
 
     return () => subscription.unsubscribe();
@@ -39,10 +38,28 @@ export default function Navbar() {
 
         <div className="flex items-center gap-1 sm:gap-2">
           <Link
-            href="/cv"
-            className="text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
+            href="/generate"
+            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
           >
-            CV Optimizer
+            Cover Letter
+          </Link>
+          <Link
+            href="/cv"
+            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
+          >
+            CV
+          </Link>
+          <Link
+            href="/followup"
+            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
+          >
+            Follow-up
+          </Link>
+          <Link
+            href="/blog"
+            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
+          >
+            Blog
           </Link>
           <Link
             href="/pricing"
@@ -51,16 +68,16 @@ export default function Navbar() {
             Pricing
           </Link>
 
-          {ready && (
+          {ready ? (
             user ? (
               <Link
                 href="/account"
-                className="text-sm bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition ml-1 flex items-center gap-1.5"
+                className="flex items-center gap-1.5 text-sm bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition ml-1"
               >
                 <span className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
                   {user.email?.[0]?.toUpperCase()}
                 </span>
-                Account
+                <span className="hidden sm:inline">Account</span>
               </Link>
             ) : (
               <Link
@@ -70,6 +87,8 @@ export default function Navbar() {
                 Sign in
               </Link>
             )
+          ) : (
+            <div className="w-20 h-8 ml-1 rounded-lg bg-gray-100 animate-pulse" />
           )}
         </div>
       </div>

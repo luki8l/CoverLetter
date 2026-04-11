@@ -1,56 +1,99 @@
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import LeadCaptureSection from '@/components/LeadCaptureSection';
 
-const COVER_LETTER_FEATURES = [
-  'Paste job URL → auto-fills everything',
-  'Upload your CV as PDF',
-  'English & Deutsch',
-  'Proper letterhead + Print as PDF',
-  'ATS signal checker',
+const TOOLS = [
+  {
+    id: 'cover-letter',
+    href: '/generate',
+    accentClass: 'bg-indigo-600',
+    labelColor: 'text-indigo-300',
+    label: 'Cover Letter Generator',
+    title: 'Paste job post. Get letter.',
+    desc: 'References actual JD requirements and your real background. Job fit score + ATS signal checker built in.',
+    cta: 'Generate free →',
+    ctaClass: 'bg-white text-indigo-600 hover:bg-indigo-50',
+    plan: null,
+    features: [
+      'Auto-fill from job URL',
+      'Streams in real time',
+      'Job Fit Score (free) + Strategy tip (Pro)',
+      'Interview prep — 2 free, 5 with Pro',
+      'PDF & Word (.docx) export',
+    ],
+  },
+  {
+    id: 'followup',
+    href: '/followup',
+    accentClass: 'bg-violet-600',
+    labelColor: 'text-violet-300',
+    label: 'Follow-up Email Generator',
+    title: 'The email that tips decisions.',
+    desc: 'Application check-in, post-interview thank-you, rejection recovery. Specific, short, and human — in seconds.',
+    cta: 'Write a follow-up →',
+    ctaClass: 'bg-white text-violet-600 hover:bg-violet-50',
+    plan: 'Free',
+    features: [
+      'Application follow-up (1 week after)',
+      'Interview thank-you (sent same day)',
+      'Rejection recovery — keep the door open',
+      'Open in any email client instantly',
+    ],
+  },
+  {
+    id: 'cv',
+    href: '/cv',
+    accentClass: 'bg-gray-900',
+    labelColor: 'text-gray-500',
+    label: 'CV Optimizer',
+    title: 'Raw notes in. ATS CV out.',
+    desc: 'Paste anything — messy notes, old CV, LinkedIn. Get a clean, keyword-rich CV. Use it for your cover letter in one click.',
+    cta: 'Optimize CV →',
+    ctaClass: 'bg-white text-gray-900 hover:bg-gray-100',
+    plan: null,
+    features: [
+      'Upload existing PDF to reformat',
+      'ATS keyword optimization',
+      'One-click: use as cover letter base',
+      'PDF export',
+    ],
+  },
 ];
 
-const CV_FEATURES = [
-  'Paste any format — messy notes, old CV, LinkedIn',
-  'Upload existing PDF to reformat',
-  'Keyword-optimized for your target role',
-  'One-click: use CV for cover letter',
-  'Print-ready PDF output',
-];
-
-const HOW_IT_WORKS = [
-  {
-    num: '01',
-    title: 'Paste the job URL',
-    body: 'We fetch the posting automatically — job title, company, description, and company context. No copy-paste needed.',
-  },
-  {
-    num: '02',
-    title: 'Add your background',
-    body: 'Paste your CV text or upload a PDF. The AI reads your actual experience — no generic filler.',
-  },
-  {
-    num: '03',
-    title: 'Get a letter worth sending',
-    body: 'Watch it write in real time. Copy, download .txt, or print to PDF. Ready to submit in under a minute.',
-  },
+const WORKFLOW_STEPS = [
+  { num: '01', title: 'Paste the job URL', body: 'Auto-fills everything — title, company, description, and company context. No copy-paste.', badge: null },
+  { num: '02', title: 'Check your fit', body: 'See your match score, strengths, gaps, and the exact angle to lead with — before writing a word.', badge: 'Free' },
+  { num: '03', title: 'Get the letter', body: 'Watch it stream in real time. Specific to this role, this company, your actual background.', badge: null },
+  { num: '04', title: 'Refine it', body: 'Longer, shorter, more formal, bolder opening — one click. Or write your own instruction.', badge: null },
+  { num: '05', title: 'Prep for everything', body: 'Interview questions + answer frameworks. Follow-up email when the time comes. All in one place.', badge: null },
 ];
 
 const TESTIMONIALS = [
   {
-    quote: 'I used CoverDraft for 8 applications. Got 5 interviews. The letters actually reference real things from the job post.',
+    quote: 'I got 5 interviews from 8 applications. The fit score told me exactly what to lead with for each company.',
     name: 'Markus H.',
     role: 'Software Engineer, Berlin',
   },
   {
-    quote: 'The CV optimizer turned my messy bullet list into something I\'m actually proud to send.',
+    quote: 'The interview thank-you email I generated got a reply within an hour. I got the offer two days later.',
     name: 'Sophie R.',
     role: 'Product Manager, Vienna',
   },
   {
-    quote: 'Tried three other generators. All produced the same template garbage. This one sounds like me.',
+    quote: 'Every other generator gives you the same template garbage. This one actually reads the job description.',
     name: 'James T.',
     role: 'Marketing Lead, London',
   },
+];
+
+const COMPARISON = [
+  { feature: 'Human-sounding output (no AI clichés)', us: true, them: false },
+  { feature: 'Job Fit Score before you apply', us: true, them: false },
+  { feature: 'Interview prep tied to your JD + CV', us: true, them: false },
+  { feature: 'Post-interview thank-you email', us: true, them: false },
+  { feature: 'Application tracker', us: true, them: false },
+  { feature: 'PDF + Word export with proper letterhead', us: true, them: '~' },
+  { feature: 'Refine with one click', us: true, them: false },
 ];
 
 export default function HomePage() {
@@ -58,8 +101,7 @@ export default function HomePage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'CoverDraft',
-    description:
-      'Free AI cover letter generator and CV optimizer. Personalized, ATS-friendly, and human-sounding — in under 60 seconds.',
+    description: 'The complete AI job application toolkit — cover letter, CV, fit score, interview prep, and follow-up emails. Free to start.',
     url: process.env.NEXT_PUBLIC_APP_URL,
     applicationCategory: 'BusinessApplication',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
@@ -67,213 +109,142 @@ export default function HomePage() {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="min-h-screen flex flex-col bg-white">
         <Navbar />
 
-        {/* ── Hero ──────────────────────────────────────────────────────── */}
+        {/* ── Hero ────────────────────────────────────────────── */}
         <section className="relative flex flex-col items-center px-4 pt-20 pb-24 text-center overflow-hidden">
-          {/* Subtle radial glow */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full opacity-20"
-            style={{ background: 'radial-gradient(ellipse at center, #818cf8 0%, transparent 70%)' }}
-          />
+          <div aria-hidden className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full opacity-[0.13]"
+            style={{ background: 'radial-gradient(ellipse at center, #818cf8 0%, transparent 70%)' }} />
 
           <div className="relative z-10 flex flex-col items-center">
-            <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-8">
+            <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-8 border border-indigo-100">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-              Powered by Claude AI · Streams in real time
+              Cover letter · Fit score · Interview prep · Follow-up emails
             </div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-gray-900 leading-[1.08] tracking-tight max-w-4xl mb-6">
-              Cover letters that{' '}
-              <span className="text-indigo-600">don&apos;t sound like AI</span>
+              Every tool to{' '}
+              <span className="text-indigo-600">land the interview</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-gray-500 max-w-2xl leading-relaxed mb-10">
-              Paste a job URL. Add your background. Watch the letter write itself in seconds —
-              personalized, ATS-friendly, and human enough that nobody will know.
+              From job post to signed offer — CoverDraft handles the writing. Cover letter, CV, fit analysis, interview prep, follow-up emails. One platform, completely free to start.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3 mb-5">
-              <Link
-                href="/generate"
-                className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-base hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 w-full sm:w-auto text-center"
-              >
-                Generate cover letter →
+            <div className="flex flex-col sm:flex-row items-center gap-3 mb-6">
+              <Link href="/generate"
+                className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-base hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 w-full sm:w-auto text-center">
+                Generate cover letter free →
               </Link>
-              <Link
-                href="/cv"
-                className="bg-white text-gray-700 px-8 py-4 rounded-xl font-semibold text-base hover:bg-gray-50 transition border border-gray-200 w-full sm:w-auto text-center"
-              >
-                Optimize my CV
+              <Link href="/pricing"
+                className="bg-white text-gray-700 px-8 py-4 rounded-xl font-semibold text-base hover:bg-gray-50 transition border border-gray-200 w-full sm:w-auto text-center">
+                See Pro — €9/mo
               </Link>
             </div>
 
-            <p className="text-xs text-gray-400">
-              Free · No account required · 1 generation/day
-            </p>
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+              <p className="text-xs text-gray-400">No account needed · 1 letter/day free</p>
+              <span className="text-gray-200 text-xs hidden sm:inline">·</span>
+              <p className="text-xs text-gray-400">
+                <span className="font-semibold text-indigo-600">Sign up free</span> → 2 letters/day + save your work
+              </p>
+            </div>
           </div>
         </section>
 
-        {/* ── How it works ──────────────────────────────────────────────── */}
+        {/* ── How it works ────────────────────────────────────── */}
         <section className="bg-gray-50 border-y border-gray-100 py-20 px-4">
           <div className="max-w-5xl mx-auto">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 text-center mb-3">
-              How it works
-            </p>
-            <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-14">
-              Job URL in. Submit-ready letter out.
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-              {HOW_IT_WORKS.map((step) => (
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 text-center mb-3">How it works</p>
+            <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-14">The full application workflow, in one place</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-6">
+              {WORKFLOW_STEPS.map((step) => (
                 <div key={step.num} className="flex flex-col">
-                  <span className="text-4xl font-black text-indigo-100 mb-4 leading-none">
-                    {step.num}
-                  </span>
-                  <h3 className="font-bold text-gray-900 mb-2">{step.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{step.body}</p>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-3xl font-black text-indigo-100 leading-none">{step.num}</span>
+                    {step.badge && (
+                      <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">{step.badge}</span>
+                    )}
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-1.5 text-sm">{step.title}</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">{step.body}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── Two tools ─────────────────────────────────────────────────── */}
+        {/* ── 3 Tools ─────────────────────────────────────────── */}
         <section className="py-20 px-4">
           <div className="max-w-5xl mx-auto">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 text-center mb-3">
-              Two tools, one workflow
-            </p>
-            <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-14">
-              Optimize CV → generate letter → submit
-            </h2>
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 text-center mb-3">Four tools</p>
+            <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-14">Everything in one workflow</h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Cover Letter card */}
-              <div className="bg-indigo-600 rounded-2xl p-7 text-white flex flex-col">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {TOOLS.map((tool) => (
+                <div key={tool.id} className={`${tool.accentClass} rounded-2xl p-7 text-white flex flex-col`}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={`text-xs font-bold uppercase tracking-widest ${tool.labelColor}`}>{tool.label}</span>
+                    {tool.plan && (
+                      <span className="text-xs font-semibold text-emerald-300 bg-emerald-400/20 border border-emerald-400/30 rounded-full px-2 py-0.5">{tool.plan}</span>
+                    )}
                   </div>
-                  <span className="text-xs font-bold uppercase tracking-widest text-indigo-300">Cover Letter Generator</span>
+                  <h3 className="text-xl font-bold mb-2 mt-3">{tool.title}</h3>
+                  <p className="text-sm opacity-80 leading-relaxed mb-5">{tool.desc}</p>
+                  <ul className="space-y-2 mb-6 flex-1">
+                    {tool.features.map((f, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm opacity-80">
+                        <svg className="w-3.5 h-3.5 mt-0.5 shrink-0 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href={tool.href} className={`block text-center font-bold text-sm px-5 py-3 rounded-xl transition ${tool.ctaClass}`}>
+                    {tool.cta}
+                  </Link>
                 </div>
-                <h3 className="text-xl font-bold mb-3">Paste job post. Get letter.</h3>
-                <p className="text-sm text-indigo-100 leading-relaxed mb-6">
-                  References actual details from the job description. Proper letterhead, ATS signals checked, print to PDF in one click.
-                </p>
-                <ul className="space-y-2 mb-8 flex-1">
-                  {COVER_LETTER_FEATURES.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-indigo-100">
-                      <svg className="w-3.5 h-3.5 text-indigo-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/generate"
-                  className="block text-center bg-white text-indigo-600 font-bold text-sm px-5 py-3 rounded-xl hover:bg-indigo-50 transition"
-                >
-                  Generate for free →
-                </Link>
-              </div>
-
-              {/* CV Optimizer card */}
-              <div className="bg-gray-900 rounded-2xl p-7 text-white flex flex-col">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-gray-700 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <span className="text-xs font-bold uppercase tracking-widest text-gray-500">CV Optimizer</span>
-                </div>
-                <h3 className="text-xl font-bold mb-3">Raw notes in. ATS CV out.</h3>
-                <p className="text-sm text-gray-400 leading-relaxed mb-6">
-                  Paste anything unstructured. Get a clean, keyword-rich CV — then use it for your cover letter in one click.
-                </p>
-                <ul className="space-y-2 mb-8 flex-1">
-                  {CV_FEATURES.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-gray-400">
-                      <svg className="w-3.5 h-3.5 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/cv"
-                  className="block text-center bg-white text-gray-900 font-bold text-sm px-5 py-3 rounded-xl hover:bg-gray-100 transition"
-                >
-                  Optimize CV →
-                </Link>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ── What makes it different ───────────────────────────────────── */}
+        {/* ── Comparison table ────────────────────────────────── */}
         <section className="bg-gray-50 border-y border-gray-100 py-20 px-4">
-          <div className="max-w-5xl mx-auto">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 text-center mb-3">
-              Not like other generators
-            </p>
-            <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-14">
-              The difference is in the output
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              {[
-                {
-                  icon: (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                  ),
-                  title: 'No banned phrases',
-                  body: '20+ AI-tell phrases blocked at prompt level. No "I am passionate about", "fast-paced environment", "results-driven", or "I look forward to hearing from you."',
-                },
-                {
-                  icon: (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  ),
-                  title: 'Specific, not generic',
-                  body: 'References actual requirements from the job post and actual experience from your background — not template placeholders.',
-                },
-                {
-                  icon: (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  ),
-                  title: 'ATS-optimized by default',
-                  body: 'Keywords from the job description land in context — in sentences, not stuffed into a list. The signal bar confirms before you send.',
-                },
-              ].map((item, i) => (
-                <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                  <div className="w-9 h-9 rounded-lg bg-indigo-50 flex items-center justify-center mb-4">
-                    <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      {item.icon}
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{item.body}</p>
+          <div className="max-w-3xl mx-auto">
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 text-center mb-3">vs. other tools</p>
+            <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-10">Why job seekers switch to CoverDraft</h2>
+
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+              <div className="grid grid-cols-3 text-xs font-bold text-gray-500 uppercase tracking-widest px-6 py-3 border-b border-gray-100 bg-gray-50">
+                <span className="col-span-1">Feature</span>
+                <span className="text-center text-indigo-700">CoverDraft</span>
+                <span className="text-center">Others</span>
+              </div>
+              {COMPARISON.map((row, i) => (
+                <div key={i} className={`grid grid-cols-3 items-center px-6 py-3.5 text-sm ${i % 2 === 0 ? '' : 'bg-gray-50/50'} border-b border-gray-100 last:border-0`}>
+                  <span className="text-gray-700 col-span-1 pr-4">{row.feature}</span>
+                  <span className="text-center">
+                    {row.us === true && <svg className="w-5 h-5 text-emerald-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>}
+                  </span>
+                  <span className="text-center">
+                    {row.them === false && <svg className="w-5 h-5 text-red-300 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>}
+                    {row.them === true && <svg className="w-5 h-5 text-emerald-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>}
+                    {row.them === '~' && <span className="text-gray-400 text-xs font-medium">Partial</span>}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── Testimonials ──────────────────────────────────────────────── */}
+        {/* ── Testimonials ────────────────────────────────────── */}
         <section className="py-20 px-4">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-14">
-              From people who got interviews
-            </h2>
+            <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-14">From people who got the interview</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {TESTIMONIALS.map((t, i) => (
                 <div key={i} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
@@ -295,25 +266,35 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Final CTA ─────────────────────────────────────────────────── */}
+        {/* ── Email lead capture ──────────────────────────────── */}
+        <LeadCaptureSection />
+
+        {/* ── Final CTA ───────────────────────────────────────── */}
         <section className="py-20 px-4">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="bg-indigo-600 rounded-3xl p-12">
-              <h2 className="text-3xl font-extrabold text-white mb-4">
-                Start with one free letter
-              </h2>
-              <p className="text-indigo-200 text-base mb-8">
-                No account. No credit card. See the output before you decide anything.
-              </p>
-              <Link
-                href="/generate"
-                className="inline-block bg-white text-indigo-600 font-bold text-base px-10 py-4 rounded-xl hover:bg-indigo-50 transition shadow-lg"
-              >
-                Generate for free →
-              </Link>
-              <p className="text-indigo-300 text-xs mt-5">
-                1 free per day · Upgrade to Pro for unlimited
-              </p>
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-indigo-600 rounded-3xl p-10 sm:p-14 text-center relative overflow-hidden">
+              <div aria-hidden className="pointer-events-none absolute inset-0 opacity-20"
+                style={{ background: 'radial-gradient(ellipse at 30% 50%, #a5b4fc 0%, transparent 60%), radial-gradient(ellipse at 70% 50%, #818cf8 0%, transparent 60%)' }} />
+              <div className="relative z-10">
+                <p className="text-indigo-300 text-xs font-bold uppercase tracking-widest mb-3">Free to start · Pro from €9/month</p>
+                <h2 className="text-3xl font-extrabold text-white mb-4">Start with your next application</h2>
+                <p className="text-indigo-200 text-base mb-8 max-w-lg mx-auto">
+                  No account needed to try it. Create a free account and get 2 letters per day — or upgrade to Pro for the full toolkit, unlimited.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <Link href="/generate"
+                    className="inline-block bg-white text-indigo-600 font-bold text-sm px-8 py-3.5 rounded-xl hover:bg-indigo-50 transition shadow-lg w-full sm:w-auto text-center">
+                    Generate free →
+                  </Link>
+                  <Link href="/auth"
+                    className="inline-block bg-white/20 text-white font-semibold text-sm px-6 py-3.5 rounded-xl hover:bg-white/30 transition border border-white/20 w-full sm:w-auto text-center">
+                    Create free account
+                  </Link>
+                </div>
+                <p className="text-indigo-300 text-xs mt-5">
+                  Free account = 2 letters/day + saved history + application tracker
+                </p>
+              </div>
             </div>
           </div>
         </section>
