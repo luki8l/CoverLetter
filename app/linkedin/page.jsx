@@ -104,7 +104,7 @@ export default function LinkedInPage() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">LinkedIn Message Generator</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Stop sending generic "I am interested" messages. Write something recruiters actually reply to.
+            Stop sending generic &ldquo;I am interested&rdquo; messages. Write something recruiters actually reply to.
           </p>
         </div>
 

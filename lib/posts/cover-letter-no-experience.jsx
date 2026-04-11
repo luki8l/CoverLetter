@@ -24,7 +24,7 @@ export default function Post() {
         entry-level applications.
       </p>
 
-      <h2>What "No Experience" Actually Means to a Recruiter</h2>
+      <h2>What &ldquo;No Experience&rdquo; Actually Means to a Recruiter</h2>
       <p>
         Hiring managers reading an entry-level application are not expecting a 10-year track record. They
         know you do not have one — that is why the role is listed as entry-level. What they are trying to
