@@ -1,4 +1,5 @@
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata = {
   title: 'CoverDraft — AI Cover Letter, Fit Score & Interview Prep',
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="font-sans bg-white text-gray-900 antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   );
