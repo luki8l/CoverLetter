@@ -4,7 +4,7 @@ import { Analytics } from '@vercel/analytics/next';
 export const metadata = {
   title: 'CoverDraft — AI Cover Letter, Fit Score & Interview Prep',
   description:
-    'Generate a tailored, ATS-friendly cover letter in seconds. See your job fit score, get a letter strategy, prep for interviews, and write the perfect follow-up email — all in one workflow. Free to start.',
+    'Generate a tailored, ATS-friendly cover letter in seconds. Job fit score, interview prep & follow-up emails included. Free to start.',
   keywords: 'cover letter generator, AI cover letter, job fit score, interview prep, follow-up email, ATS cover letter, free cover letter writer',
   authors: [{ name: 'CoverDraft' }],
   openGraph: {
