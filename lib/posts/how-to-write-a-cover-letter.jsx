@@ -1,6 +1,7 @@
 export const meta = {
   slug: 'how-to-write-a-cover-letter',
   title: 'How to Write a Cover Letter That Actually Gets Read (2025)',
+  titleTag: 'How to Write a Cover Letter That Gets Read',
   description:
     'Most cover letters get ignored in under 7 seconds. Here is exactly how to write a cover letter that stands out — structure, opening lines, common mistakes, and examples.',
   date: '2025-04-10',

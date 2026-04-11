@@ -12,7 +12,7 @@ export async function generateMetadata({ params }) {
   if (!post) return {};
   const { meta } = post;
   return {
-    title: `${meta.title} | CoverDraft`,
+    title: `${meta.titleTag || meta.title} | CoverDraft`,
     description: meta.description,
     keywords: meta.keywords,
     alternates: { canonical: `https://coverdraft.app/blog/${meta.slug}` },

@@ -1,6 +1,7 @@
 export const meta = {
   slug: 'follow-up-email-after-interview',
   title: 'How to Write a Follow-Up Email After an Interview (With Examples)',
+  titleTag: 'How to Write a Follow-Up Email After an Interview',
   description:
     'A follow-up email after a job interview takes 5 minutes and most candidates skip it. Here is exactly what to write — with templates for thank-you, check-in, and rejection recovery.',
   date: '2025-04-06',

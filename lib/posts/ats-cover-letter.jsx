@@ -1,6 +1,7 @@
 export const meta = {
   slug: 'ats-cover-letter',
   title: 'How to Write an ATS-Friendly Cover Letter (Without Sounding Like a Robot)',
+  titleTag: 'How to Write an ATS-Friendly Cover Letter',
   description:
     'ATS software screens your cover letter before any human reads it. Here is exactly how to pass the filter while still writing something a recruiter will want to read.',
   date: '2025-04-08',

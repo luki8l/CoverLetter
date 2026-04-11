@@ -192,6 +192,110 @@ function GeneratePageInner() {
   }
 
   return (
+    <>
+      {upgraded && (
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-3">
+          <svg className="w-5 h-5 text-green-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <p className="text-sm text-green-800 font-medium">Welcome to Pro — unlimited generations.</p>
+        </div>
+      )}
+
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <GeneratorForm
+          onGenerate={generate}
+          onAnalyze={analyze}
+          isLoading={isLoading || isStreaming}
+          isAnalyzing={matchLoading}
+        />
+      </div>
+
+      {/* ── Job Fit Analysis ─────────────────────────────── */}
+      {(matchData || matchLoading || matchError) && (
+        <div className="mt-4" id="match-anchor">
+          <MatchCard
+            data={matchData}
+            isLoading={matchLoading}
+            error={matchError}
+            isPro={isPro}
+            onRetry={() => lastForm && analyze(lastForm)}
+          />
+        </div>
+      )}
+      {!matchLoading && !matchData && !matchError && <div id="match-anchor" />}
+
+      {error && (
+        <div className="mt-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-2">
+          <svg className="w-4 h-4 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
+
+      <div id="output-anchor" />
+
+      <OutputSection
+        coverLetter={coverLetter}
+        isStreaming={isStreaming}
+        onRegenerate={() => lastForm && generate(lastForm)}
+        isLoading={isLoading}
+        formData={lastForm}
+        onToast={toast}
+      />
+
+      {/* Signup nudge — only for anonymous users after generating */}
+      {coverLetter && !isStreaming && isLoggedIn === false && (
+        <SignupNudge />
+      )}
+
+      {coverLetter && !isStreaming && (
+        <WhatsNext
+          formData={lastForm}
+          onScrollToInterview={() => document.getElementById('interview-anchor')?.scrollIntoView({ behavior: 'smooth' })}
+          onToast={toast}
+        />
+      )}
+
+      {coverLetter && !isStreaming && (
+        <div className="mt-4">
+          <RefinePanel
+            formData={lastForm}
+            currentLetter={coverLetter}
+            onRefined={(text, streaming) => {
+              setCoverLetter(text);
+              setIsStreaming(streaming);
+              if (streaming) setTimeout(() => document.getElementById('output-anchor')?.scrollIntoView({ behavior: 'smooth' }), 100);
+            }}
+            onShowModal={() => setShowModal(true)}
+          />
+        </div>
+      )}
+
+      {/* ── Interview Prep ───────────────────────────────── */}
+      {coverLetter && !isStreaming && (
+        <div id="interview-anchor">
+          <InterviewPrep
+            data={interviewData}
+            isLoading={interviewLoading}
+            error={interviewError}
+            isPro={isPro}
+            onGenerate={prepInterview}
+          />
+        </div>
+      )}
+
+      {showModal && (
+        <UpgradeModal onClose={() => setShowModal(false)} />
+      )}
+      <ToastContainer toasts={toasts} />
+    </>
+  );
+}
+
+export default function GeneratePage() {
+  return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
 
@@ -203,116 +307,14 @@ function GeneratePageInner() {
           </p>
         </div>
 
-        {upgraded && (
-          <div className="mb-6 bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-3">
-            <svg className="w-5 h-5 text-green-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <p className="text-sm text-green-800 font-medium">Welcome to Pro — unlimited generations.</p>
-          </div>
-        )}
-
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm">
-          <GeneratorForm
-            onGenerate={generate}
-            onAnalyze={analyze}
-            isLoading={isLoading || isStreaming}
-            isAnalyzing={matchLoading}
-          />
-        </div>
-
-        {/* ── Job Fit Analysis ─────────────────────────────── */}
-        {(matchData || matchLoading || matchError) && (
-          <div className="mt-4" id="match-anchor">
-            <MatchCard
-              data={matchData}
-              isLoading={matchLoading}
-              error={matchError}
-              isPro={isPro}
-              onRetry={() => lastForm && analyze(lastForm)}
-            />
-          </div>
-        )}
-        {!matchLoading && !matchData && !matchError && <div id="match-anchor" />}
-
-        {error && (
-          <div className="mt-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-2">
-            <svg className="w-4 h-4 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
-        )}
-
-        <div id="output-anchor" />
-
-        <OutputSection
-          coverLetter={coverLetter}
-          isStreaming={isStreaming}
-          onRegenerate={() => lastForm && generate(lastForm)}
-          isLoading={isLoading}
-          formData={lastForm}
-          onToast={toast}
-        />
-
-        {/* Signup nudge — only for anonymous users after generating */}
-        {coverLetter && !isStreaming && isLoggedIn === false && (
-          <SignupNudge />
-        )}
-
-        {coverLetter && !isStreaming && (
-          <WhatsNext
-            formData={lastForm}
-            onScrollToInterview={() => document.getElementById('interview-anchor')?.scrollIntoView({ behavior: 'smooth' })}
-            onToast={toast}
-          />
-        )}
-
-        {coverLetter && !isStreaming && (
-          <div className="mt-4">
-            <RefinePanel
-              formData={lastForm}
-              currentLetter={coverLetter}
-              onRefined={(text, streaming) => {
-                setCoverLetter(text);
-                setIsStreaming(streaming);
-                if (streaming) setTimeout(() => document.getElementById('output-anchor')?.scrollIntoView({ behavior: 'smooth' }), 100);
-              }}
-              onShowModal={() => setShowModal(true)}
-            />
-          </div>
-        )}
-
-        {/* ── Interview Prep ───────────────────────────────── */}
-        {coverLetter && !isStreaming && (
-          <div id="interview-anchor">
-            <InterviewPrep
-              data={interviewData}
-              isLoading={interviewLoading}
-              error={interviewError}
-              isPro={isPro}
-              onGenerate={prepInterview}
-            />
-          </div>
-        )}
+        <Suspense fallback={null}>
+          <GeneratePageInner />
+        </Suspense>
       </main>
 
       <footer className="border-t border-gray-100 bg-white py-6 text-center">
         <p className="text-xs text-gray-400">© {new Date().getFullYear()} CoverDraft</p>
       </footer>
-
-      {showModal && (
-        <UpgradeModal onClose={() => setShowModal(false)} />
-      )}
-      <ToastContainer toasts={toasts} />
     </div>
-  );
-}
-
-export default function GeneratePage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-400 text-sm">Loading…</div>}>
-      <GeneratePageInner />
-    </Suspense>
   );
 }
