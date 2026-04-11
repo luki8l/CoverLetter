@@ -56,6 +56,12 @@ export default function Navbar() {
             Follow-up
           </Link>
           <Link
+            href="/blog"
+            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
+          >
+            Blog
+          </Link>
+          <Link
             href="/pricing"
             className="text-sm text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition"
           >
